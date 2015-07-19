@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "debugger.h"
+#include "util/debugger.h"
 #include "ocr/classifier.h"
 #include "ocr/image_processor.h"
 

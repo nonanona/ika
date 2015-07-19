@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "job.h"
-#include "options.h"
 #include "scene_extractor_job.h"
 
 

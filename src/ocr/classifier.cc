@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "ocr/classifier.h"
-#include "util.h"
+#include "util/util.h"
 
 Classifier::Classifier(const std::string& dir, double sigma) : sigma_(sigma) {
   Load(ScanDir(dir));

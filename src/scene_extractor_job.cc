@@ -2,8 +2,8 @@
 
 #include <glog/logging.h>
 
+#include "util/util.h"
 #include "ocr/result_page_reader.h"
-#include "options.h"
 #include "scene_analyzer/game_scene_extractor.h"
 
 SceneExtractorJob::SceneExtractorJob() {
@@ -13,9 +13,9 @@ SceneExtractorJob::~SceneExtractorJob() {
 }
 
 bool SceneExtractorJob::ProcessArgs(int argc, char** argv) {
-  video_path_ = Options::GetCmdOption(argv + 1, argv + argc, "-i");
-  is_nawabari_ = Options::HasCmdOption(argv + 1, argv + argc, "--nawabari");
-  is_debug_ = Options::HasCmdOption(argv + 1, argv + argc, "--debug");
+  video_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
+  is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
+  is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   return !video_path_.empty();
 }
 

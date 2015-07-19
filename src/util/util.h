@@ -9,3 +9,5 @@ void PrintRect(const cv::Rect& rect);
 void PrintSize(const cv::Size& size);
 void PrintPoint(const cv::Point& pos);
 std::vector<std::string> ScanDir(const std::string& dir);
+std::string GetCmdOption(char** begin, char** end, const std::string& opt);
+bool HasCmdOption(char** begin, char** end, const std::string& opt);

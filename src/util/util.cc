@@ -35,3 +35,14 @@ std::vector<std::string> ScanDir(const std::string& dir) {
   }
   return out;
 }
+
+std::string GetCmdOption(char** begin, char** end, const std::string& opt) {
+  char** it = std::find(begin, end, opt);
+  if (it != end && ++it != end)
+    return std::string(*it);
+  return std::string();
+}
+
+bool HasCmdOption(char** begin, char** end, const std::string& opt) {
+  return std::find(begin, end, opt) != end;
+}
