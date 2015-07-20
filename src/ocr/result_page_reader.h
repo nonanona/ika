@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ocr/classifier.h"
-#include "ocr/image_processor.h"
+#include "ocr/image_clipper.h"
 
 class ResultPageReader {
  public:
@@ -22,7 +22,7 @@ class ResultPageReader {
 
   cv::Mat image_;
   const bool is_nawabari_;
-  ImageProcessor* image_processor_;
+  ImageClipper* image_clipper_;
   Classifier* killdeath_classifier_;
   Classifier* paintpoint_classifier_;
 };

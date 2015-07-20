@@ -7,7 +7,7 @@
 
 #include "util/debugger.h"
 #include "ocr/classifier.h"
-#include "ocr/image_processor.h"
+#include "ocr/image_clipper.h"
 
 namespace {
 
@@ -93,7 +93,7 @@ end_b:
 
 }  // namespace
 
-ImageProcessor::ImageProcessor(const std::string& fname, bool is_nawabari)
+ImageClipper::ImageClipper(const std::string& fname, bool is_nawabari)
     : is_nawabari_(is_nawabari),
       image_(cv::imread(fname)),
       gray_image_(cv::imread(fname, CV_LOAD_IMAGE_GRAYSCALE)) {
@@ -101,7 +101,7 @@ ImageProcessor::ImageProcessor(const std::string& fname, bool is_nawabari)
   clippingImage();
 }
 
-ImageProcessor::ImageProcessor(const cv::Mat& image, bool is_nawabari)
+ImageClipper::ImageClipper(const cv::Mat& image, bool is_nawabari)
     : is_nawabari_(is_nawabari),
       image_(image) {
   cv::cvtColor(image, gray_image_, CV_RGB2GRAY);
@@ -109,10 +109,10 @@ ImageProcessor::ImageProcessor(const cv::Mat& image, bool is_nawabari)
   clippingImage();
 }
 
-ImageProcessor::~ImageProcessor() {
+ImageClipper::~ImageClipper() {
 }
 
-void ImageProcessor::calculateRectInternal(int index, bool is_player) {
+void ImageClipper::calculateRectInternal(int index, bool is_player) {
   ClippingRect& rect = rects_[index];
 
   rect.result = cv::Rect(cv::Point(870, kRankY[index] - 20),
@@ -141,14 +141,14 @@ void ImageProcessor::calculateRectInternal(int index, bool is_player) {
   }
 }
 
-void ImageProcessor::calculateRect() {
+void ImageClipper::calculateRect() {
   int my_rank = FindMyIndex(gray_image_);
   for (int i = 0; i < 8; ++i) {
     calculateRectInternal(i, i == my_rank);
   }
 }
 
-void ImageProcessor::ShowDebugImage(bool with_rect) const {
+void ImageClipper::ShowDebugImage(bool with_rect) const {
   cv::Mat result = image_.clone();
   if (with_rect) {
     for (int i = 0; i < 8; ++i) {
@@ -181,13 +181,13 @@ void ImageProcessor::ShowDebugImage(bool with_rect) const {
   ShowAndWaitKey(result);
 }
 
-void ImageProcessor::clippingImage() {
+void ImageClipper::clippingImage() {
   for (int i = 0; i < 8; ++i) {
     clippingImageInternal(i);
   }
 }
 
-void ImageProcessor::clippingImageInternal(int index) {
+void ImageClipper::clippingImageInternal(int index) {
   const ClippingRect& rect = getRect(index);
   ClippedImage& image = images_[index];
 

@@ -6,11 +6,11 @@
 
 class Classifier;
 
-class ImageProcessor {
+class ImageClipper {
  public:
-  ImageProcessor(const std::string& fname, bool is_nawabari);
-  ImageProcessor(const cv::Mat& image, bool is_nawabari);
-  virtual ~ImageProcessor();
+  ImageClipper(const std::string& fname, bool is_nawabari);
+  ImageClipper(const cv::Mat& image, bool is_nawabari);
+  virtual ~ImageClipper();
 
   struct ClippingRect {
     cv::Rect result;
