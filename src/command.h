@@ -1,9 +1,9 @@
 #pragma once
 
-class Job {
+class Command {
  public:
-  Job() {}
-  virtual ~Job() {}
+  Command() {}
+  virtual ~Command() {}
 
   virtual const char* GetCommandName() const = 0;
   virtual bool ProcessArgs(int argc, char** argv) = 0;

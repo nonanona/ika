@@ -4,37 +4,37 @@
 
 #include <algorithm>
 
-#include "job.h"
-#include "scene_extractor_job.h"
+#include "command.h"
+#include "scene_extractor_command.h"
 
 
 int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
 
-  Job* jobs[] = {
-    new SceneExtractorJob()
+  Command* commands[] = {
+    new SceneExtractorCommand()
   };
 
   const std::string command(argc == 1 ? "" : argv[1]);
   if (command.empty()) {
     printf("Usage: %s [command]\n", argv[0]);
     printf("Available commands\n");
-    for (int i = 0; i < sizeof(jobs)/sizeof(jobs[0]); ++i) {
-      printf("  %s\n", jobs[i]->GetCommandName());
+    for (int i = 0; i < sizeof(commands)/sizeof(commands[0]); ++i) {
+      printf("  %s\n", commands[i]->GetCommandName());
     }
     exit(1);
   }
 
 
-  for (int i = 0; i < sizeof(jobs)/sizeof(jobs[0]); ++i) {
-    if (command != jobs[i]->GetCommandName())
+  for (int i = 0; i < sizeof(commands)/sizeof(commands[0]); ++i) {
+    if (command != commands[i]->GetCommandName())
       continue;
-    if (!jobs[i]->ProcessArgs(argc, argv)) {
-      jobs[i]->PrintUsage(argv[0]);
+    if (!commands[i]->ProcessArgs(argc, argv)) {
+      commands[i]->PrintUsage(argv[0]);
       exit(1);
     }
 
-    jobs[i]->Run();
+    commands[i]->Run();
   }
 
   google::ShutdownGoogleLogging();

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "job.h"
+#include "command.h"
 
 #include <stdint.h>
 
 #include <string>
 
-class SceneExtractorJob : public Job {
+class SceneExtractorCommand : public Command {
  public:
-  SceneExtractorJob();
-  virtual ~SceneExtractorJob();
+  SceneExtractorCommand();
+  virtual ~SceneExtractorCommand();
 
   virtual const char* GetCommandName() const {
     return "scene_extract";

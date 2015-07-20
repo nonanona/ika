@@ -1,4 +1,4 @@
-#include "scene_extractor_job.h"
+#include "scene_extractor_command.h"
 
 #include <glog/logging.h>
 
@@ -6,25 +6,25 @@
 #include "ocr/result_page_reader.h"
 #include "scene_analyzer/game_scene_extractor.h"
 
-SceneExtractorJob::SceneExtractorJob() {
+SceneExtractorCommand::SceneExtractorCommand() {
 }
 
-SceneExtractorJob::~SceneExtractorJob() {
+SceneExtractorCommand::~SceneExtractorCommand() {
 }
 
-bool SceneExtractorJob::ProcessArgs(int argc, char** argv) {
+bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   video_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
   is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   return !video_path_.empty();
 }
 
-void SceneExtractorJob::PrintUsage(const char* myself) {
+void SceneExtractorCommand::PrintUsage(const char* myself) {
   printf("Usage: %s %s -i [video path] [--nawabari] [--debug]\n",
          myself, GetCommandName());
 }
 
-void SceneExtractorJob::Run() {
+void SceneExtractorCommand::Run() {
   GameSceneExtractor gse(video_path_);
   ResultPageReader rpr(is_nawabari_);
   int battle_id = 0;
@@ -76,7 +76,7 @@ void SceneExtractorJob::Run() {
 }
 
 
-std::string SceneExtractorJob::MsecToString(int64_t msec) {
+std::string SceneExtractorCommand::MsecToString(int64_t msec) {
   const int hour_msec = 1000 * 60 * 60;
   const int min_msec = 1000 * 60;
   const int sec_msec = 1000;
