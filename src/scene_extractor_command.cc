@@ -16,11 +16,14 @@ bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   video_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
   is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
+  battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
+                                   "--battle-out-dir");
   return !video_path_.empty();
 }
 
 void SceneExtractorCommand::PrintUsage(const char* myself) {
-  printf("Usage: %s %s -i [video path] [--nawabari] [--debug]\n",
+  printf("Usage: %s %s -i [video path] --battle-out-dir [output dir] \
+         [--nawabari] [--debug]\n",
          myself, GetCommandName());
 }
 
@@ -65,6 +68,14 @@ void SceneExtractorCommand::Run() {
         printf("    Player %d: %2d/%2d\n",
                i, rpr.ReadKillCount(i), rpr.ReadDeathCount(i));
       }
+    }
+
+    if (!battle_result_dir_.empty()) {
+      char buf[260];
+      snprintf(buf, 64, "%s/battle%03d.png", battle_result_dir_.c_str(),
+               battle_id);
+      printf("Saving Battle results image to %s\n", buf);
+      cv::imwrite(buf, result_image);
     }
 
     if (is_debug_)

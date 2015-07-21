@@ -22,6 +22,7 @@ class SceneExtractorCommand : public Command {
   static std::string MsecToString(int64_t msec);
 
   std::string video_path_;
+  std::string battle_result_dir_;
   bool is_nawabari_;
   bool is_debug_;
 };
