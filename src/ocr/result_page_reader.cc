@@ -3,8 +3,10 @@
 ResultPageReader::ResultPageReader(bool is_nawabari)
     : is_nawabari_(is_nawabari),
       image_clipper_(NULL),
-      killdeath_classifier_(NULL),
-      paintpoint_classifier_(NULL) {
+      killdeath_classifier_(
+          new Classifier("res/kill_death_param", 1.1)),
+      paintpoint_classifier_(
+          is_nawabari ? new Classifier("res/point_param", 2.0) : NULL) {
 }
 
 ResultPageReader::~ResultPageReader() {
@@ -20,7 +22,7 @@ void ResultPageReader::LoadImage(const cv::Mat& image) {
 }
 
 void ResultPageReader::PredictImages(
-    const cv::Mat* images, int* out, int length, Classifier* classifier) {
+    const cv::Mat* images, int* out, int length, Classifier* classifier) const {
   cv::Mat buf;
   for (int i = 0; i < length; ++i) {
     cv::Canny(images[i], buf, 50, 200);
@@ -28,10 +30,7 @@ void ResultPageReader::PredictImages(
   }
 }
 
-int ResultPageReader::ReadKillCount(int index) {
-  if (!killdeath_classifier_)
-    killdeath_classifier_ = new Classifier("res/kill_death_param", 1.1);
-
+int ResultPageReader::ReadKillCount(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
   int result[2] = {};
@@ -39,10 +38,7 @@ int ResultPageReader::ReadKillCount(int index) {
   return (result[0] % 10) * 10 + (result[1] % 10);
 }
 
-int ResultPageReader::ReadDeathCount(int index) {
-  if (!killdeath_classifier_)
-    killdeath_classifier_ = new Classifier("res/kill_death_param", 1.1);
-
+int ResultPageReader::ReadDeathCount(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
   int result[2] = {};
@@ -50,10 +46,7 @@ int ResultPageReader::ReadDeathCount(int index) {
   return (result[0] % 10) * 10 + (result[1] % 10);
 }
 
-int ResultPageReader::ReadPaintPoint(int index) {
-  if (!paintpoint_classifier_)
-    paintpoint_classifier_ = new Classifier("res/point_param", 2.0);
-
+int ResultPageReader::ReadPaintPoint(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
   int result[4] = {};

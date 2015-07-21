@@ -10,15 +10,17 @@ class ResultPageReader {
 
   void LoadImage(const cv::Mat& image);
 
-  int ReadKillCount(int index);
-  int ReadDeathCount(int index);
-  int ReadPaintPoint(int index);
+  int ReadKillCount(int index) const;
+  int ReadDeathCount(int index) const;
+  int ReadPaintPoint(int index) const;
 
   void ShowDebugImage(bool with_rect) const;
 
+  bool is_nawabari() const { return is_nawabari_; }
+
  private:
-  void PredictImages(
-      const cv::Mat* images, int* out, int length, Classifier* classifier);
+  void PredictImages(const cv::Mat* images, int* out, int length,
+                     Classifier* classifier) const;
 
   cv::Mat image_;
   const bool is_nawabari_;
