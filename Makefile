@@ -1,3 +1,11 @@
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Linux)
+  OS = Linux
+endif
+ifeq ($(UNAME),Darwin)
+  OS = OSX
+endif
+
 CXX = clang++
 CXX_FLAGS =
 
@@ -11,6 +19,9 @@ PACKAGES = "libglog opencv"
 
 INCLUDE = -I$(SRCDIR) $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config $(PACKAGES) --cflags-only-I)
 LDFLAGS = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config $(PACKAGES) --libs)
+ifeq ($(OS), OSX)
+  INCLUDE += -I/opt/local/include
+endif
 
 
 CC_FILES = $(shell find $(SRCDIR) -name "*.cc")

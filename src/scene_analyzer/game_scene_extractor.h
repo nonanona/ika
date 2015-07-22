@@ -37,7 +37,7 @@ class GameSceneExtractor {
   void GetImageAt(int64_t frame, cv::Mat* out);
 
  private:
-  int64_t FindBattleFrameRoughly(long start_frame);
+  int64_t FindBattleFrameRoughly(int64_t start_frame);
   bool FindBattleStart(int64_t last_known_non_battle_frame,
                        int64_t known_battle_frame,
                        TimeWindow* out_time,
@@ -46,8 +46,8 @@ class GameSceneExtractor {
                      FrameWindow* out_frame);
   bool FindResultEnd(int64_t battle_end_frame, TimeWindow* out_time,
                      FrameWindow* out_frame);
-  int64_t FindEarliestBlackoutEndFrame(long battle_start_frame);
-  int64_t LinearSearch(long start_frame, long end_frame,
+  int64_t FindEarliestBlackoutEndFrame(int64_t battle_start_frame);
+  int64_t LinearSearch(int64_t start_frame, int64_t end_frame,
                     SceneAnalyzer::Scene scene);
 
 
