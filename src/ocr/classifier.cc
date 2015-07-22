@@ -33,7 +33,12 @@ int Classifier::Predict(const cv::Mat& image, double certainty) {
 int Classifier::PredictInternal(const cv::Mat& data, double certainty) {
   int counter[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   for (int i = 0; i < classifiers_.size(); ++i) {
+#if CV_MAJOR_VERSION == 3
+    counter[static_cast<int>(classifiers_[i]->predict(data.t()))]++;
+#else
     counter[static_cast<int>(classifiers_[i]->predict(data))]++;
+#endif
+
   }
   int max_label = -1;
   int max_freq = -1;
@@ -62,8 +67,12 @@ void Classifier::Load(const std::vector<std::string>& files) {
   classifiers_.resize(files.size());
   for (int i = 0; i < files.size(); ++i) {
     LOG(INFO) << "Loading classifier params from: " << files[i];
+#if CV_MAJOR_VERSION == 3
+    classifiers_[i] = cv::ml::StatModel::load<cv::ml::SVM>(files[i]);
+#else
     classifiers_[i] = new cv::SVM();
     classifiers_[i]->load(files[i].c_str());
+#endif
   }
 }
 
@@ -76,7 +85,7 @@ void Classifier::Flatten(const cv::Mat& org_image, cv::Mat* out) {
   cv::GaussianBlur(org_image, prepared_image, cv::Size(0, 0), sigma_, sigma_);
   cv::Size size = prepared_image.size();
   int length = size.width * size.height;
-  out->create(length, 1, CV_32FC1);
+  out->create(length, 1, CV_32F);
   int ii = 0;
   for (int j = 0; j < prepared_image.rows; ++j) {
     for (int k = 0; k < prepared_image.cols; ++k) {

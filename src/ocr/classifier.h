@@ -3,6 +3,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+#if CV_MAJOR_VERSION == 3
+typedef cv::Ptr<cv::ml::SVM> MySVM;
+#else
+typedef cv::SVM* MySVM;
+#endif
+
 class Classifier {
  public:
   Classifier(const std::string& dir, double sigma);
@@ -18,5 +24,5 @@ class Classifier {
   void Flatten(const cv::Mat& image, cv::Mat* out);
 
   const double sigma_;
-  std::vector<cv::SVM*> classifiers_;
+  std::vector<MySVM> classifiers_;
 };

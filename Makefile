@@ -5,10 +5,12 @@ SRCDIR = src
 OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
-PACKAGES = "opencv libglog"
+PWD = $(shell pwd)
+PKG_CONFIG_PATH=./third_party/opencv3/lib/pkgconfig
+PACKAGES = "libglog opencv"
 
-INCLUDE = -I$(SRCDIR) $(shell pkg-config $(PACKAGES) --cflags-only-I)
-LDFLAGS = $(shell pkg-config $(PACKAGES) --libs)
+INCLUDE = -I$(SRCDIR) $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config $(PACKAGES) --cflags-only-I)
+LDFLAGS = $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config $(PACKAGES) --libs)
 
 
 CC_FILES = $(shell find $(SRCDIR) -name "*.cc")
