@@ -227,6 +227,46 @@ int64_t GameSceneExtractor::BlackoutLinearSearch(
   return -1;
 }
 
+bool GameSceneExtractor::FindTitleRange(
+    int64_t start_frame, int64_t end_frame,
+    TimeWindow* out_time, FrameWindow* out_frame) {
+  VLOG(3) << "LinearSearch Whiteout Scene: "
+      << " (" << start_frame << ", " << end_frame << ")";
+  int64_t end_title_frame = WhiteoutLinearSearch(start_frame, end_frame);
+  if (end_title_frame == -1)
+    return false;
+
+  out_frame->start = start_frame;
+  out_frame->duration = end_title_frame - start_frame;
+
+  vc_->set(CV_CAP_PROP_POS_FRAMES, start_frame);
+  out_time->start = vc_->get(CV_CAP_PROP_POS_MSEC);
+  vc_->set(CV_CAP_PROP_POS_FRAMES, end_title_frame);
+  out_time->duration = vc_->get(CV_CAP_PROP_POS_MSEC) - out_time->start;
+  return true;
+}
+
+int64_t GameSceneExtractor::WhiteoutLinearSearch(int64_t start_frame,
+                                                 int64_t end_frame) {
+  VLOG(3) << "LinearSearch Whiteout Scene: "
+      << " (" << start_frame << ", " << end_frame << ")";
+  cv::Mat frame_img;
+  vc_->set(CV_CAP_PROP_POS_FRAMES, start_frame);
+  while (true) {
+    int64_t frame = vc_->get(CV_CAP_PROP_POS_FRAMES);
+    if (frame >= end_frame)
+      return -1;
+
+    vc_->read(frame_img);
+    if (frame_img.empty())
+      return -1;
+
+    if (analyzer_->IsWhiteoutScene(frame_img))
+      return vc_->get(CV_CAP_PROP_POS_FRAMES);
+  }
+  return -1;
+}
+
 int64_t GameSceneExtractor::FindEarliestBlackoutEndFrame(
     int64_t battle_start_frame) {
   // Due to performance issue, unable to increment backward.
@@ -301,6 +341,12 @@ bool GameSceneExtractor::FindNearestGameRegion(
       out->battle_frame.start);
   if (blackout_end_frame == -1) {
     LOG(ERROR) << "Failed to find blackout battle enter position.";
+    return false;
+  }
+
+  if (!FindTitleRange(blackout_end_frame, out->battle_frame.start,
+                      &out->title_msec, &out->title_frame)) {
+    LOG(ERROR) << "Failed to find battle title region.";
     return false;
   }
 

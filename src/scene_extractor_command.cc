@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 
 #include "util/util.h"
+#include "util/debugger.h"
 #include "ocr/result_page_reader.h"
 #include "ocr/name_tracker.h"
 #include "scene_analyzer/game_scene_extractor.h"
@@ -20,6 +21,8 @@ bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
                                    "--battle-out-dir");
+  title_result_dir_ = GetCmdOption(argv + 1, argv + argc,
+                                   "--title-out-dir");
   return !video_path_.empty();
 }
 
@@ -63,6 +66,17 @@ void SceneExtractorCommand::Run() {
                battle_id);
       printf("Saving Battle results image to %s\n", buf);
       cv::imwrite(buf, result_image);
+    }
+
+    if (!title_result_dir_.empty()) {
+      cv::Mat title_image;
+      gse.GetImageAt(region.title_frame.start + region.title_frame.duration / 2,
+                     &title_image);
+      char buf[260];
+      snprintf(buf, 64, "%s/title%03d.png", title_result_dir_.c_str(),
+               battle_id);
+      printf("Saving Title results image to %s\n", buf);
+      cv::imwrite(buf, title_image);
     }
 
     if (is_debug_)

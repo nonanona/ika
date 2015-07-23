@@ -17,15 +17,11 @@ class SceneAnalyzer {
   bool IsBattleScene(const cv::Mat& frame);
   bool IsResultScene(const cv::Mat& frame);
   bool IsBlackoutScene(const cv::Mat& frame);
+  bool IsWhiteoutScene(const cv::Mat& frame);
 
  private:
-  int fps_;
-  long nframe_;
-  int width_;
-  int height_;
-
   Interface* battle_analyzer_;
   Interface* result_analyzer_;
   Interface* blackout_analyzer_;
-
+  Interface* whiteout_analyzer_;
 };

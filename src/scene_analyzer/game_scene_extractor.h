@@ -18,6 +18,9 @@ class GameSceneExtractor {
     TimeWindow game_msec;
     FrameWindow game_frame;
 
+    TimeWindow title_msec;
+    FrameWindow title_frame;
+
     TimeWindow battle_msec;
     FrameWindow battle_frame;
 
@@ -48,6 +51,9 @@ class GameSceneExtractor {
                      FrameWindow* out_frame);
   int64_t FindEarliestBlackoutEndFrame(int64_t battle_start_frame);
   int64_t BlackoutLinearSearch(int64_t start_frame, int64_t end_frame);
+  bool FindTitleRange(int64_t start_frame, int64_t end_frame,
+                      TimeWindow* out_time, FrameWindow* out_frame);
+  int64_t WhiteoutLinearSearch(int64_t start_frame, int64_t end_frame);
 
 
   const std::string video_path_;
