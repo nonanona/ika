@@ -13,6 +13,7 @@ class ResultPageReader {
   int ReadKillCount(int index) const;
   int ReadDeathCount(int index) const;
   int ReadPaintPoint(int index) const;
+  const cv::Mat& GetNameImage(int index) const;
 
   void ShowDebugImage(bool with_rect) const;
 

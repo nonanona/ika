@@ -4,6 +4,7 @@
 
 #include "util/util.h"
 #include "ocr/result_page_reader.h"
+#include "ocr/name_tracker.h"
 #include "scene_analyzer/game_scene_extractor.h"
 #include "printer.h"
 
@@ -31,6 +32,8 @@ void SceneExtractorCommand::PrintUsage(const char* myself) {
 void SceneExtractorCommand::Run() {
   GameSceneExtractor gse(video_path_);
   ResultPageReader rpr(is_nawabari_);
+  NameTracker tracker;
+
   int battle_id = 0;
   int64_t frame = 0;
   while (true) {
@@ -47,7 +50,12 @@ void SceneExtractorCommand::Run() {
     gse.GetImageAt(result_pos, &result_image);
     rpr.LoadImage(result_image);
 
-    printer::PrintGameResult(rpr);
+    int name_ids[8];
+    for (int i = 0; i < 8; ++i) {
+      name_ids[i] = tracker.GetNameId(rpr.GetNameImage(i));
+    }
+
+    printer::PrintGameResultWithID(rpr, name_ids);
 
     if (!battle_result_dir_.empty()) {
       char buf[260];

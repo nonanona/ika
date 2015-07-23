@@ -7,6 +7,7 @@ namespace printer {
 
 void PrintGameSceneSummary(const GameSceneExtractor::GameRegion region);
 void PrintGameResult(const ResultPageReader& reader);
+void PrintGameResultWithID(const ResultPageReader& reader, int name_ids[8]);
 
 }  // namespace printer
 

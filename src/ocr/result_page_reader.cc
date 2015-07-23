@@ -58,3 +58,7 @@ int ResultPageReader::ReadPaintPoint(int index) const {
 void ResultPageReader::ShowDebugImage(bool with_rect) const {
   image_clipper_->ShowDebugImage(with_rect);
 }
+
+const cv::Mat& ResultPageReader::GetNameImage(int index) const {
+  return image_clipper_->getImage(index).name;
+}

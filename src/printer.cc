@@ -52,7 +52,25 @@ void PrintGameResult(const ResultPageReader& reader) {
              i, reader.ReadKillCount(i), reader.ReadDeathCount(i));
     }
   }
+}
 
+void PrintGameResultWithID(const ResultPageReader& reader,
+                               int name_ids[8]) {
+  printf("  Play Result:\n");
+  if (reader.is_nawabari()) {
+    for (int i = 0; i < 8; ++i) {
+      printf("    Player %d (ID: %2d): %2d/%2d %4d Point\n",
+             i, name_ids[i],
+             reader.ReadKillCount(i), reader.ReadDeathCount(i),
+             reader.ReadPaintPoint(i));
+    }
+  } else {
+    for (int i = 0; i < 8; ++i) {
+      printf("    Player %d (ID: %2d): %2d/%2d\n",
+             i, name_ids[i],
+             reader.ReadKillCount(i), reader.ReadDeathCount(i));
+    }
+  }
 }
 
 }  // namespace printer
