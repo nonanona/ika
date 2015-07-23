@@ -4,12 +4,6 @@
 
 class SceneAnalyzer {
  public:
-  enum Scene {
-    UNKNOWN = 0,
-    BATTLE = 1,
-    BLACKOUT = 2,
-    RESULT = 3
-  };
   SceneAnalyzer(const cv::Size& size);
   virtual ~SceneAnalyzer();
 
@@ -20,7 +14,9 @@ class SceneAnalyzer {
     virtual bool IsScene(const cv::Mat& frame) = 0;
   };
 
-  Scene Process(const cv::Mat& frame);
+  bool IsBattleScene(const cv::Mat& frame);
+  bool IsResultScene(const cv::Mat& frame);
+  bool IsBlackoutScene(const cv::Mat& frame);
 
  private:
   int fps_;
@@ -28,8 +24,8 @@ class SceneAnalyzer {
   int width_;
   int height_;
 
-  Interface* battle_guesser_;
-  Interface* result_guesser_;
-  Interface* blackout_guesser_;
+  Interface* battle_analyzer_;
+  Interface* result_analyzer_;
+  Interface* blackout_analyzer_;
 
 };

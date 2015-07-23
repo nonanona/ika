@@ -41,7 +41,7 @@ int64_t GameSceneExtractor::FindBattleFrameRoughly(int64_t start_frame) {
       return -1;
     }
 
-    if (analyzer_->Process(frame_img) == SceneAnalyzer::BATTLE) {
+    if (analyzer_->IsBattleScene(frame_img)) {
       VLOG(3) << "Find battle field roughly at " << target_msec;
       return vc_->get(CV_CAP_PROP_POS_FRAMES);
     } else {
@@ -78,7 +78,7 @@ bool GameSceneExtractor::FindBattleStart(int64_t last_known_non_battle_frame,
       LOG(ERROR) << "Failed to obtain frame image at " << msec;
       return false;
     }
-    if (analyzer_->Process(frame_img) == SceneAnalyzer::BATTLE) {
+    if (analyzer_->IsBattleScene(frame_img)) {
       VLOG(3) << "Updatiung bisect range: "
           << "(" << bisect_start << ", " << bisect_end << ") ->"
           << "(" << bisect_start << ", " << trial << ")";
@@ -109,7 +109,7 @@ bool GameSceneExtractor::FindBattleEnd(int64_t current_battle_frame,
       return false;
     }
 
-    if (analyzer_->Process(frame_img) == SceneAnalyzer::BATTLE) {
+    if (analyzer_->IsBattleScene(frame_img)) {
       VLOG(3) << "Still battle field. Skipping 30 sec";
       target_msec += 30 * 1000;
     } else {
@@ -141,7 +141,7 @@ bool GameSceneExtractor::FindBattleEnd(int64_t current_battle_frame,
       LOG(ERROR) << "Failed to obtain frame image at " << target_msec;
       return false;
     }
-    if (analyzer_->Process(frame_img) != SceneAnalyzer::BATTLE) {
+    if (!analyzer_->IsBattleScene(frame_img)) {
       VLOG(3) << "Updatiung bisect range: "
           << "(" << bisect_start_msec << ", " << bisect_end_msec << ") ->"
           << "(" << bisect_start_msec << ", " << trial << ")";
@@ -180,7 +180,7 @@ bool GameSceneExtractor::FindResultEnd(
     // Due to un-reliable scene analyzer, we doesn't regard non result scene as
     // the end of result scene. Check 10 proceeding frame and if all of them are
     // non result scene, we finalizes the end of result point.
-    if (analyzer_->Process(frame_img) == SceneAnalyzer::RESULT) {
+    if (analyzer_->IsResultScene(frame_img)) {
       if (!result_started) {
         out_time->start = vc_->get(CV_CAP_PROP_POS_MSEC);
         out_frame->start = vc_->get(CV_CAP_PROP_POS_FRAMES);
@@ -206,8 +206,8 @@ bool GameSceneExtractor::FindResultEnd(
   return false;
 }
 
-int64_t GameSceneExtractor::LinearSearch(int64_t start_frame, int64_t end_frame,
-                                      SceneAnalyzer::Scene scene) {
+int64_t GameSceneExtractor::BlackoutLinearSearch(
+    int64_t start_frame, int64_t end_frame) {
   VLOG(3) << "LinearSearch Blackout Scene: "
       << " (" << start_frame << ", " << end_frame << ")";
   cv::Mat frame_img;
@@ -221,7 +221,7 @@ int64_t GameSceneExtractor::LinearSearch(int64_t start_frame, int64_t end_frame,
     if (frame_img.empty())
       return -1;
 
-    if (analyzer_->Process(frame_img) == scene)
+    if (analyzer_->IsBlackoutScene(frame_img))
       return vc_->get(CV_CAP_PROP_POS_FRAMES);
   }
   return -1;
@@ -245,7 +245,7 @@ int64_t GameSceneExtractor::FindEarliestBlackoutEndFrame(
     int64_t end_frame = vc_->get(CV_CAP_PROP_POS_FRAMES);
 
 
-    int64_t r = LinearSearch(start_frame, end_frame, SceneAnalyzer::BLACKOUT);
+    int64_t r = BlackoutLinearSearch(start_frame, end_frame);
     if (r == -1)
       continue;
 
@@ -254,7 +254,7 @@ int64_t GameSceneExtractor::FindEarliestBlackoutEndFrame(
       vc_->read(frame_img);
       if (frame_img.empty())
         return -1;
-      if (analyzer_->Process(frame_img) != SceneAnalyzer::BLACKOUT)
+      if (!analyzer_->IsBlackoutScene(frame_img))
         return vc_->get(CV_CAP_PROP_POS_FRAMES);
     }
     return -1;

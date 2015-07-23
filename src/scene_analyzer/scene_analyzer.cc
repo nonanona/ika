@@ -10,23 +10,22 @@
 #include "scene_analyzer/blackout_scene_analyzer.h"
 
 SceneAnalyzer::SceneAnalyzer(const cv::Size& size)
-    : battle_guesser_(new BattleSceneAnalyzer()),
-      result_guesser_(new ResultSceneAnalyzer()),
-      blackout_guesser_(new BlackoutSceneAnalyzer(size)) {
+    : battle_analyzer_(new BattleSceneAnalyzer()),
+      result_analyzer_(new ResultSceneAnalyzer()),
+      blackout_analyzer_(new BlackoutSceneAnalyzer(size)) {
 }
 
 SceneAnalyzer::~SceneAnalyzer() {
 }
 
-SceneAnalyzer::Scene SceneAnalyzer::Process(const cv::Mat& frame) {
-  if (battle_guesser_->IsScene(frame)) {
-    return BATTLE;
-  } else if (result_guesser_->IsScene(frame)) {
-    return RESULT;
-  } else if (blackout_guesser_->IsScene(frame)) {
-    return BLACKOUT;
-  } else {
-    return UNKNOWN;
-  }
+bool SceneAnalyzer::IsBattleScene(const cv::Mat& frame) {
+  return battle_analyzer_->IsScene(frame);
 }
 
+bool SceneAnalyzer::IsResultScene(const cv::Mat& frame) {
+  return result_analyzer_->IsScene(frame);
+}
+
+bool SceneAnalyzer::IsBlackoutScene(const cv::Mat& frame) {
+  return blackout_analyzer_->IsScene(frame);
+}
