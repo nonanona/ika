@@ -38,6 +38,10 @@ class ImageClipper {
 
   void ShowDebugImage(bool with_rect) const;
 
+  int my_index() const {
+    return my_index_;
+  }
+
  private:
   void calculateRect();
   void calculateRectInternal(int i, bool is_player);
@@ -45,6 +49,7 @@ class ImageClipper {
   void clippingImageInternal(int i);
 
   const bool is_nawabari_;
+  int my_index_;
   cv::Mat image_;
   cv::Mat gray_image_;
   ClippingRect rects_[8];

@@ -21,7 +21,6 @@ SceneExtractorCommand::~SceneExtractorCommand() {
 
 bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   video_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
-  is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
                                    "--battle-out-dir");
@@ -30,13 +29,13 @@ bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
 
 void SceneExtractorCommand::PrintUsage(const char* myself) {
   printf("Usage: %s %s -i [video path] --battle-out-dir [output dir] \
-         [--nawabari] [--debug]\n",
+         [--debug]\n",
          myself, GetCommandName());
 }
 
 void SceneExtractorCommand::Run() {
   GameSceneExtractor gse(video_path_);
-  ResultPageReader rpr(is_nawabari_);
+  ResultPageReader rpr;
   TitlePageReader tpr;
   NameTracker tracker;
 
@@ -47,22 +46,16 @@ void SceneExtractorCommand::Run() {
     if (!gse.FindNearestGameRegion(frame, &region))
       return;
 
-    printf("Game %d:\n", battle_id);
     std::vector<cv::Mat> image_sequence(4);
     int64_t title_frame =
         region.title_frame.start + region.title_frame.duration / 2;
-
     for (int i = 0; i < 4; ++i) {
       image_sequence[i] = cv::Mat();
       gse.GetImageAt(title_frame + (i - 2) * 8, &image_sequence[i]);
     }
     tpr.LoadImageSequence(image_sequence);
 
-    printf("  Rule: %s\n", tpr.GetRuleString(tpr.ReadRule()));
-    printf("  Map : %s\n", tpr.GetMapString(tpr.ReadMap()));
-
-    printer::PrintGameSceneSummary(region);
-
+    rpr.SetIsNawabari(tpr.ReadRule() == TitlePageReader::NAWABARI);
     cv::Mat result_image;
     const int64_t result_pos =
         region.result_frame.start + region.result_frame.duration / 2;
@@ -74,6 +67,11 @@ void SceneExtractorCommand::Run() {
       name_ids[i] = tracker.GetNameId(rpr.GetNameImage(i));
     }
 
+    printf("Game %d:\n", battle_id);
+    printf("  Rule: %s\n", tpr.GetRuleString(tpr.ReadRule()));
+    printf("  Map : %s\n", tpr.GetMapString(tpr.ReadMap()));
+    printf("  Result: %s\n", rpr.GetMyPosition() < 4 ? "YOU WIN" : "YOU LOSE");
+    printer::PrintGameSceneSummary(region);
     printer::PrintGameResultWithID(rpr, name_ids);
 
     if (!battle_result_dir_.empty()) {

@@ -101,6 +101,7 @@ end_b:
 
 ImageClipper::ImageClipper(const std::string& fname, bool is_nawabari)
     : is_nawabari_(is_nawabari),
+      my_index_(-1),
       image_(cv::imread(fname)),
       gray_image_(cv::imread(fname, CV_LOAD_IMAGE_GRAYSCALE)) {
   calculateRect();
@@ -109,6 +110,7 @@ ImageClipper::ImageClipper(const std::string& fname, bool is_nawabari)
 
 ImageClipper::ImageClipper(const cv::Mat& image, bool is_nawabari)
     : is_nawabari_(is_nawabari),
+      my_index_(-1),
       image_(image) {
   cv::cvtColor(image, gray_image_, CV_RGB2GRAY);
   calculateRect();
@@ -148,9 +150,9 @@ void ImageClipper::calculateRectInternal(int index, bool is_player) {
 }
 
 void ImageClipper::calculateRect() {
-  int my_rank = FindMyIndex(gray_image_);
+  my_index_ = FindMyIndex(gray_image_);
   for (int i = 0; i < 8; ++i) {
-    calculateRectInternal(i, i == my_rank);
+    calculateRectInternal(i, i == my_index_);
   }
 }
 

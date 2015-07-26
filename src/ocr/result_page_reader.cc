@@ -1,18 +1,24 @@
 #include "ocr/result_page_reader.h"
 
-ResultPageReader::ResultPageReader(bool is_nawabari)
-    : is_nawabari_(is_nawabari),
+ResultPageReader::ResultPageReader()
+    : is_nawabari_(false),
       image_clipper_(NULL),
       killdeath_classifier_(
           new Classifier("res/kill_death_param", 1.1)),
-      paintpoint_classifier_(
-          is_nawabari ? new Classifier("res/point_param", 2.0) : NULL) {
+      paintpoint_classifier_(NULL) {
 }
 
 ResultPageReader::~ResultPageReader() {
   delete paintpoint_classifier_;
   delete killdeath_classifier_;
   delete image_clipper_;
+}
+
+void ResultPageReader::SetIsNawabari(bool is_nawabari) {
+  is_nawabari_ = is_nawabari;
+  if (is_nawabari && paintpoint_classifier_ == NULL) {
+    paintpoint_classifier_ = new Classifier("res/point_param", 2.0);
+  }
 }
 
 void ResultPageReader::LoadImage(const cv::Mat& image) {
@@ -53,6 +59,10 @@ int ResultPageReader::ReadPaintPoint(int index) const {
   PredictImages(image.point, result, 4, paintpoint_classifier_);
   return (result[0] % 10) * 1000 + (result[1] % 10) * 100 +
       (result[2] % 10) * 10 + (result[3] % 10);
+}
+
+int ResultPageReader::GetMyPosition() const {
+  return image_clipper_->my_index();
 }
 
 void ResultPageReader::ShowDebugImage(bool with_rect) const {

@@ -40,36 +40,28 @@ void PrintGameSceneSummary(const GameSceneExtractor::GameRegion region) {
 
 void PrintGameResult(const ResultPageReader& reader) {
   printf("  Play Result:\n");
-  if (reader.is_nawabari()) {
-    for (int i = 0; i < 8; ++i) {
-      printf("    Player %d: %2d/%2d %4d Point\n",
-             i, reader.ReadKillCount(i), reader.ReadDeathCount(i),
-             reader.ReadPaintPoint(i));
-    }
-  } else {
-    for (int i = 0; i < 8; ++i) {
-      printf("    Player %d: %2d/%2d\n",
-             i, reader.ReadKillCount(i), reader.ReadDeathCount(i));
-    }
+  for (int i = 0; i < 8; ++i) {
+    printf("    Player %d: %2d/%2d",
+           i, reader.ReadKillCount(i), reader.ReadDeathCount(i));
+    if (reader.is_nawabari())
+      printf(" %4d Point", reader.ReadPaintPoint(i));
+    if (i == reader.GetMyPosition())
+      printf(" <- You");
+    printf("\n");
   }
 }
 
 void PrintGameResultWithID(const ResultPageReader& reader,
                                int name_ids[8]) {
   printf("  Play Result:\n");
-  if (reader.is_nawabari()) {
-    for (int i = 0; i < 8; ++i) {
-      printf("    Player %d (ID: %2d): %2d/%2d %4d Point\n",
-             i, name_ids[i],
-             reader.ReadKillCount(i), reader.ReadDeathCount(i),
-             reader.ReadPaintPoint(i));
-    }
-  } else {
-    for (int i = 0; i < 8; ++i) {
-      printf("    Player %d (ID: %2d): %2d/%2d\n",
-             i, name_ids[i],
-             reader.ReadKillCount(i), reader.ReadDeathCount(i));
-    }
+  for (int i = 0; i < 8; ++i) {
+    printf("    Player %d (ID: %2d): %2d/%2d",
+           i, name_ids[i], reader.ReadKillCount(i), reader.ReadDeathCount(i));
+    if (reader.is_nawabari())
+      printf(" %4d Point", reader.ReadPaintPoint(i));
+    if (i == reader.GetMyPosition())
+      printf(" <- You");
+    printf("\n");
   }
 }
 

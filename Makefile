@@ -14,7 +14,7 @@ OUTDIR = out
 OBJDIR = $(OUTDIR)/obj
 BINDIR = $(OUTDIR)/bin
 PWD = $(shell pwd)
-PKG_CONFIG_PATH=./third_party/opencv3/lib/pkgconfig
+PKG_CONFIG_PATH=
 PACKAGES = "libglog opencv"
 
 INCLUDE = -I$(SRCDIR) $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config $(PACKAGES) --cflags-only-I)

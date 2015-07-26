@@ -5,7 +5,7 @@
 
 class ResultPageReader {
  public:
-  ResultPageReader(bool is_nawabri);
+  ResultPageReader();
   ~ResultPageReader();
 
   void LoadImage(const cv::Mat& image);
@@ -14,9 +14,11 @@ class ResultPageReader {
   int ReadDeathCount(int index) const;
   int ReadPaintPoint(int index) const;
   const cv::Mat& GetNameImage(int index) const;
+  int GetMyPosition() const;
 
   void ShowDebugImage(bool with_rect) const;
 
+  void SetIsNawabari(bool is_nawabari);
   bool is_nawabari() const { return is_nawabari_; }
 
  private:
@@ -24,7 +26,7 @@ class ResultPageReader {
                      Classifier* classifier) const;
 
   cv::Mat image_;
-  const bool is_nawabari_;
+  bool is_nawabari_;
   ImageClipper* image_clipper_;
   Classifier* killdeath_classifier_;
   Classifier* paintpoint_classifier_;
