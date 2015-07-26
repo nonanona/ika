@@ -5,8 +5,8 @@
 
 #include "scene_analyzer/blackout_scene_analyzer.h"
 
-#define CLIP_WIDTH 100
-#define CLIP_HEIGHT 100
+#define CLIP_WIDTH 200
+#define CLIP_HEIGHT 200
 
 BlackoutSceneAnalyzer::BlackoutSceneAnalyzer(const cv::Size& size)
     : rec_((size.width - CLIP_WIDTH) / 2, (size.height - CLIP_WIDTH) / 2,

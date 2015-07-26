@@ -8,6 +8,7 @@
 #include "util/debugger.h"
 #include "ocr/classifier.h"
 #include "ocr/image_clipper.h"
+#include <glog/logging.h>
 
 namespace {
 
@@ -85,6 +86,11 @@ end_t:
     }
   }
 end_b:
+  if (margin_l == size.width || margin_r == size.width ||
+      margin_t == size.height || margin_b == size.height) {
+    // Fuckin' empty name. Do nothing here for avoiding empty rectangle.
+    return;
+  }
   out->x += margin_l;
   out->y += margin_t;
   out->width -= (margin_l + margin_r);

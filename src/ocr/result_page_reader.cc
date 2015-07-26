@@ -26,7 +26,7 @@ void ResultPageReader::PredictImages(
   cv::Mat buf;
   for (int i = 0; i < length; ++i) {
     cv::Canny(images[i], buf, 50, 200);
-    out[i] = classifier->Predict(buf, 0.8);
+    out[i] = classifier->Predict(buf, 0.7);
   }
 }
 

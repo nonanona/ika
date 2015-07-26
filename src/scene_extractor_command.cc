@@ -1,10 +1,14 @@
 #include "scene_extractor_command.h"
 
 #include <glog/logging.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "util/util.h"
 #include "util/debugger.h"
 #include "ocr/result_page_reader.h"
+#include "ocr/title_page_reader.h"
 #include "ocr/name_tracker.h"
 #include "scene_analyzer/game_scene_extractor.h"
 #include "printer.h"
@@ -21,8 +25,6 @@ bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
                                    "--battle-out-dir");
-  title_result_dir_ = GetCmdOption(argv + 1, argv + argc,
-                                   "--title-out-dir");
   return !video_path_.empty();
 }
 
@@ -35,6 +37,7 @@ void SceneExtractorCommand::PrintUsage(const char* myself) {
 void SceneExtractorCommand::Run() {
   GameSceneExtractor gse(video_path_);
   ResultPageReader rpr(is_nawabari_);
+  TitlePageReader tpr;
   NameTracker tracker;
 
   int battle_id = 0;
@@ -45,6 +48,19 @@ void SceneExtractorCommand::Run() {
       return;
 
     printf("Game %d:\n", battle_id);
+    std::vector<cv::Mat> image_sequence(4);
+    int64_t title_frame =
+        region.title_frame.start + region.title_frame.duration / 2;
+
+    for (int i = 0; i < 4; ++i) {
+      image_sequence[i] = cv::Mat();
+      gse.GetImageAt(title_frame + (i - 2) * 8, &image_sequence[i]);
+    }
+    tpr.LoadImageSequence(image_sequence);
+
+    printf("  Rule: %s\n", tpr.GetRuleString(tpr.ReadRule()));
+    printf("  Map : %s\n", tpr.GetMapString(tpr.ReadMap()));
+
     printer::PrintGameSceneSummary(region);
 
     cv::Mat result_image;
@@ -62,21 +78,18 @@ void SceneExtractorCommand::Run() {
 
     if (!battle_result_dir_.empty()) {
       char buf[260];
-      snprintf(buf, 64, "%s/battle%03d.png", battle_result_dir_.c_str(),
-               battle_id);
+      for (int i = 0; i < 10000; ++i) {
+        snprintf(buf, 64, "%s/battle%03d.png", battle_result_dir_.c_str(),
+                 battle_id);
+        int fd = open(buf, O_RDWR);
+        if (fd == -1) {
+          break;
+        } else {
+          close(fd);
+        }
+      }
       printf("Saving Battle results image to %s\n", buf);
       cv::imwrite(buf, result_image);
-    }
-
-    if (!title_result_dir_.empty()) {
-      cv::Mat title_image;
-      gse.GetImageAt(region.title_frame.start + region.title_frame.duration / 2,
-                     &title_image);
-      char buf[260];
-      snprintf(buf, 64, "%s/title%03d.png", title_result_dir_.c_str(),
-               battle_id);
-      printf("Saving Title results image to %s\n", buf);
-      cv::imwrite(buf, title_image);
     }
 
     if (is_debug_)
