@@ -178,7 +178,6 @@ TitlePageReader::Map TitlePageReader::DetectMap(
 
   for (int i = 0; i < NUM_OF_MAPS; ++i) {
     cv::Size size = maps_[i].size();
-    LOG(ERROR) << "width: " << size.width << ", " << rect.width;
     if (abs(size.width - rect.width) > 20) {
       similarity[i] = 1e+100;
       continue;
