@@ -31,26 +31,26 @@ double WhiteDiff(const cv::Mat& img1, const cv::Mat& img2) {
   cv::Size size1 = img1.size();
   cv::Size size2 = img2.size();
 
-  std::vector<double> r;
+  double min_r = 1e+100;
 
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      r.push_back(WhiteDiffInternal(
+      double cand = WhiteDiffInternal(
           img1(cv::Rect(i, j, size1.width - i, size1.height -j)),
-          img2(cv::Rect(0, 0, size2.width, size2.height))));
-      r.push_back(WhiteDiffInternal(
+          img2(cv::Rect(0, 0, size2.width, size2.height)));
+
+      if (cand < min_r)
+        min_r = cand;
+
+      cand = WhiteDiffInternal(
           img1(cv::Rect(0, 0, size1.width, size1.height)),
-          img2(cv::Rect(i, j, size2.width - i, size2.height - j))));
+          img2(cv::Rect(i, j, size2.width - i, size2.height - j)));
+
+      if (cand < min_r)
+        min_r = cand;
     }
   }
 
-  double min_r = 1e+100;
-
-  for (int i = 0; i < r.size(); ++i) {
-    if (r[i] < min_r) {
-      min_r = r[i];
-    }
-  }
   return min_r;
 }
 

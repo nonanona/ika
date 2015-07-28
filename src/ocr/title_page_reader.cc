@@ -162,18 +162,6 @@ TitlePageReader::Map TitlePageReader::ReadMap() const {
 
 TitlePageReader::Map TitlePageReader::DetectMap(
     const cv::Mat& image, const cv::Rect& rect) {
-  char buf[260];
-  for (int i = 0; i < 10000; ++i) {
-    snprintf(buf, 260, "/home/nona/test/map/map_%03d.png", i);
-    int fd = open(buf, O_RDWR);
-    if (fd == -1) {
-      break;
-    } else {
-      close(fd);
-    }
-  }
-  cv::imwrite(buf, image);
-
   double similarity[NUM_OF_MAPS];
 
   for (int i = 0; i < NUM_OF_MAPS; ++i) {
