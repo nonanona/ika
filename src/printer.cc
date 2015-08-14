@@ -41,11 +41,16 @@ void PrintGameSceneSummary(const GameSceneExtractor::GameRegion region) {
 void PrintGameResult(const ResultPageReader& reader) {
   printf("  Play Result:\n");
   for (int i = 0; i < 8; ++i) {
+    ImageClipper::PlayerStatus st = reader.GetPlayerStatus(i);
+    if (st == ImageClipper::VACANCY) {
+      printf("    Player -\n");
+      continue;
+    }
     printf("    Player %d: %2d/%2d",
            i, reader.ReadKillCount(i), reader.ReadDeathCount(i));
     if (reader.is_nawabari())
       printf(" %4d Point", reader.ReadPaintPoint(i));
-    if (i == reader.GetMyPosition())
+    if (st == ImageClipper::YOU)
       printf(" <- You");
     printf("\n");
   }
@@ -55,11 +60,16 @@ void PrintGameResultWithID(const ResultPageReader& reader,
                                int name_ids[8]) {
   printf("  Play Result:\n");
   for (int i = 0; i < 8; ++i) {
+    ImageClipper::PlayerStatus st = reader.GetPlayerStatus(i);
+    if (st == ImageClipper::VACANCY) {
+      printf("    Player -\n");
+      continue;
+    }
     printf("    Player %d (ID: %2d): %2d/%2d",
            i, name_ids[i], reader.ReadKillCount(i), reader.ReadDeathCount(i));
     if (reader.is_nawabari())
       printf(" %4d Point", reader.ReadPaintPoint(i));
-    if (i == reader.GetMyPosition())
+    if (st == ImageClipper::YOU)
       printf(" <- You");
     printf("\n");
   }

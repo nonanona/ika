@@ -61,8 +61,8 @@ int ResultPageReader::ReadPaintPoint(int index) const {
       (result[2] % 10) * 10 + (result[3] % 10);
 }
 
-int ResultPageReader::GetMyPosition() const {
-  return image_clipper_->my_index();
+ImageClipper::PlayerStatus ResultPageReader::GetPlayerStatus(int i) const {
+  return image_clipper_->GetPlayerStatus(i);
 }
 
 void ResultPageReader::ShowDebugImage(bool with_rect) const {
