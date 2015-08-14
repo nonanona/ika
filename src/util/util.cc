@@ -46,3 +46,19 @@ std::string GetCmdOption(char** begin, char** end, const std::string& opt) {
 bool HasCmdOption(char** begin, char** end, const std::string& opt) {
   return std::find(begin, end, opt) != end;
 }
+
+void ExtractWhite(const cv::Mat& in, cv::Mat* out) {
+  cv::Mat tmp;
+  cv::cvtColor(in, tmp, CV_RGB2GRAY);
+  cv::threshold(tmp, *out, 0xE0, 0xFF, CV_THRESH_BINARY);
+}
+
+bool IsBlackImage(const cv::Mat& in) {
+  for (int i = 0; i < in.rows;++i) {
+    for (int j = 0; j < in.cols; ++j) {
+      if (in.at<uchar>(i, j) != 0)
+        return false;
+    }
+  }
+  return true;
+}

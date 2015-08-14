@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include "command.h"
+#include "component_extract_command.h"
+#include "read_result_command.h"
 #include "scene_extractor_command.h"
 
 
@@ -12,7 +14,9 @@ int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
 
   Command* commands[] = {
-    new SceneExtractorCommand()
+    new SceneExtractorCommand(),
+    new ReadResultCommand(),
+    new ComponentExtractCommand(),
   };
 
   const std::string command(argc == 1 ? "" : argv[1]);

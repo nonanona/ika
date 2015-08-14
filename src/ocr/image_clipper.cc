@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "util/util.h"
 #include "util/debugger.h"
 #include "ocr/classifier.h"
 #include "ocr/image_clipper.h"
@@ -139,6 +140,9 @@ void ImageClipper::calculateRectInternal(int index, bool is_player) {
                        cv::Point(1475 - margin, kRankY[index] + 40));
   TrimBlankImage(image_, &rect.name);
 
+  rect.weapon = cv::Rect(cv::Point(1140 - margin, kRankY[index] - 10),
+                         cv::Point(1210 - margin, kRankY[index] + 58));
+
   const cv::Size kd_size(21, 26);
   rect.kill[0] = cv::Rect(cv::Point(1780, kRankY[index] - 6), kd_size);
   rect.kill[1] = cv::Rect(cv::Point(1801, kRankY[index] - 6), kd_size);
@@ -167,7 +171,7 @@ void ImageClipper::calculateRect() {
   }
 }
 
-void ImageClipper::ShowDebugImage(bool with_rect) const {
+cv::Mat ImageClipper::GetDebugImage(bool with_rect) const {
   cv::Mat result = image_.clone();
   if (with_rect) {
     for (int i = 0; i < 8; ++i) {
@@ -179,6 +183,8 @@ void ImageClipper::ShowDebugImage(bool with_rect) const {
                     cv::Scalar(0, 255, 255), 2, 8);
       cv::rectangle(result, rect.name.tl(), rect.name.br(),
                     cv::Scalar(255, 0, 0), 2, 8);
+      cv::rectangle(result, rect.weapon.tl(), rect.weapon.br(),
+                    cv::Scalar(0, 0, 255), 2, 8);
       cv::rectangle(result, rect.kill[0].tl(), rect.kill[0].br(),
                     cv::Scalar(0, 255, 0), 2, 8);
       cv::rectangle(result, rect.kill[1].tl(), rect.kill[1].br(),
@@ -199,7 +205,11 @@ void ImageClipper::ShowDebugImage(bool with_rect) const {
       }
     }
   }
-  ShowAndWaitKey(result);
+  return result;
+}
+
+void ImageClipper::ShowDebugImage(bool with_rect) const {
+  ShowAndWaitKey(GetDebugImage(with_rect));
 }
 
 void ImageClipper::clippingImage() {
@@ -216,6 +226,7 @@ void ImageClipper::clippingImageInternal(int index) {
 
   image.result = cv::Mat(image_, rect.result);
   image.name = cv::Mat(image_, rect.name);
+  image.weapon = cv::Mat(image_, rect.weapon);
   image.kill[0] = cv::Mat(image_, rect.kill[0]);
   image.kill[1] = cv::Mat(image_, rect.kill[1]);
   image.death[0] = cv::Mat(image_, rect.death[0]);
