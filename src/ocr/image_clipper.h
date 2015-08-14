@@ -15,6 +15,7 @@ class ImageClipper {
   struct ClippingRect {
     cv::Rect result;
     cv::Rect name;
+    cv::Rect weapon;
     cv::Rect point[4];
     cv::Rect kill[2];
     cv::Rect death[2];
@@ -23,6 +24,7 @@ class ImageClipper {
   struct ClippedImage {
     cv::Mat result;
     cv::Mat name;
+    cv::Mat weapon;
     cv::Mat point[4];
     cv::Mat kill[2];
     cv::Mat death[2];
@@ -37,6 +39,7 @@ class ImageClipper {
   }
 
   void ShowDebugImage(bool with_rect) const;
+  cv::Mat GetDebugImage(bool with_rect) const;
 
   int my_index() const {
     return my_index_;
