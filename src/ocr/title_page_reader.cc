@@ -68,20 +68,41 @@ void TrimBlankImage(const cv::Mat& edge, cv::Rect* out) {
 
   cv::Size size = edge.size();
 
+  bool prev_black = true;
   for (; margin_l < size.width; ++margin_l) {
+    bool all_black = true;
     for (int i = 0; i < size.height; ++i) {
-      if (edge.at<uchar>(i, margin_l) != 0)
-        goto end_l;
+      all_black &= (edge.at<uchar>(i, margin_l) == 0);
+    }
+    if (all_black) {
+      prev_black = true;
+      continue; // trim this line.
+    } else if (prev_black) {
+      prev_black = false;
+      continue;
+    } else {
+      margin_l--;
+      break;
     }
   }
-end_l:
+
   for (; margin_r < size.width; ++margin_r) {
+    bool all_black = true;
     for (int i = 0; i < size.height; ++i) {
-      if (edge.at<uchar>(i, size.width - margin_r -1) != 0)
-        goto end_r;
+      all_black &= (edge.at<uchar>(i, size.width - margin_r -1) == 0);
+    }
+    if (all_black) {
+      prev_black = true;
+      continue; // trim this line.
+    } else if (prev_black) {
+      prev_black = false;
+      continue;
+    } else {
+      margin_r--;
+      break;
     }
   }
-end_r:
+
   for (; margin_t < size.height; ++margin_t) {
     for (int i = 0; i < size.width; ++i) {
       if (edge.at<uchar>(margin_t, i) != 0)
@@ -184,6 +205,7 @@ TitlePageReader::Map TitlePageReader::DetectMap(
   }
 
   if (min_index == -1) {
+    ShowAndWaitKey(image);
     LOG(FATAL) << "Unable to detect the map name";
     abort();
   }

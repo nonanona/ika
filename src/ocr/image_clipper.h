@@ -12,6 +12,12 @@ class ImageClipper {
   ImageClipper(const cv::Mat& image, bool is_nawabari);
   virtual ~ImageClipper();
 
+  enum PlayerStatus {
+    NORMAL = 0,
+    VACANCY = -1,
+    YOU = 1,
+  };
+
   struct ClippingRect {
     cv::Rect result;
     cv::Rect name;
@@ -41,8 +47,8 @@ class ImageClipper {
   void ShowDebugImage(bool with_rect) const;
   cv::Mat GetDebugImage(bool with_rect) const;
 
-  int my_index() const {
-    return my_index_;
+  PlayerStatus GetPlayerStatus(int i ) const {
+    return status_[i];
   }
 
  private:
@@ -52,7 +58,7 @@ class ImageClipper {
   void clippingImageInternal(int i);
 
   const bool is_nawabari_;
-  int my_index_;
+  PlayerStatus status_[8];
   cv::Mat image_;
   cv::Mat gray_image_;
   ClippingRect rects_[8];

@@ -15,7 +15,7 @@ class ResultPageReader {
   int ReadDeathCount(int index) const;
   int ReadPaintPoint(int index) const;
   const cv::Mat& GetNameImage(int index) const;
-  int GetMyPosition() const;
+  ImageClipper::PlayerStatus GetPlayerStatus(int i) const;
 
   void ShowDebugImage(bool with_rect) const;
 

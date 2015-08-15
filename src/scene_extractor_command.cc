@@ -63,16 +63,23 @@ void SceneExtractorCommand::Run() {
     rpr.LoadImage(result_image);
 
     int name_ids[8];
+    int my_position;
     for (int i = 0; i < 8; ++i) {
+      ImageClipper::PlayerStatus player_status = rpr.GetPlayerStatus(i);
+      if (player_status == ImageClipper::VACANCY)
+        continue;
+      else if (player_status == ImageClipper::YOU)
+        my_position = i;
       name_ids[i] = tracker.GetNameId(rpr.GetNameImage(i));
     }
 
     printf("Game %d:\n", battle_id);
     printf("  Rule: %s\n", tpr.GetRuleString(tpr.ReadRule()));
     printf("  Map : %s\n", tpr.GetMapString(tpr.ReadMap()));
-    printf("  Result: %s\n", rpr.GetMyPosition() < 4 ? "YOU WIN" : "YOU LOSE");
+    printf("  Result: %s\n", my_position < 4 ? "YOU WIN" : "YOU LOSE");
     printer::PrintGameSceneSummary(region);
     printer::PrintGameResultWithID(rpr, name_ids);
+    fflush(stdout);
 
     if (!battle_result_dir_.empty()) {
       char buf[260];

@@ -18,6 +18,7 @@ int kRankY[] = { 158, 255, 353, 450, 653, 750, 848, 945 };
 int MaskAndWhiteness(const cv::Mat& image, const cv::Mat& mask) {
   cv::Size mask_size = mask.size();
   int rank_sum = 0;
+  int black_count;
   for (int i = 0; i < mask_size.height; ++i) {
     const uchar* line = image.ptr<uchar>(i);
     const uchar* mask_line = mask.ptr<uchar>(i);
@@ -25,28 +26,38 @@ int MaskAndWhiteness(const cv::Mat& image, const cv::Mat& mask) {
       if (mask_line[j] == 0x00) {
         rank_sum += (0xFF - line[j]);
       }
+      if (line[j] < 0x10)
+        black_count++;
     }
   }
+  if (abs(black_count - mask_size.width * mask_size.height) < 5)
+    return INT_MAX;
   return rank_sum;
 }
 
-int FindMyIndex(const cv::Mat& image) {
+void FindMyIndex(const cv::Mat& image, ImageClipper::PlayerStatus* status) {
   cv::Mat mask = cv::imread("res/rank.bmp", CV_LOAD_IMAGE_GRAYSCALE);
   cv::Size mask_size = mask.size();
 
   int max_i = -1;
   int max_value = -1;
   for (int i = 0; i < sizeof(kRankY)/sizeof(kRankY[0]); ++i) {
+    status[i] = ImageClipper::NORMAL;
+
     cv::Rect target_rect(985, kRankY[i], mask_size.width, mask_size.height);
     cv::Mat candidate(image, target_rect);
     int whiteness = MaskAndWhiteness(candidate, mask);
+    if (whiteness == INT_MAX) {
+      status[i] = ImageClipper::VACANCY;
+      continue;
+    }
 
     if (whiteness > max_value) {
       max_i = i;
       max_value = whiteness;
     }
   }
-  return max_i;
+  status[max_i] = ImageClipper::YOU;
 }
 
 void TrimBlankImage(const cv::Mat& image, cv::Rect* out) {
@@ -102,7 +113,6 @@ end_b:
 
 ImageClipper::ImageClipper(const std::string& fname, bool is_nawabari)
     : is_nawabari_(is_nawabari),
-      my_index_(-1),
       image_(cv::imread(fname)),
       gray_image_(cv::imread(fname, CV_LOAD_IMAGE_GRAYSCALE)) {
   calculateRect();
@@ -111,7 +121,6 @@ ImageClipper::ImageClipper(const std::string& fname, bool is_nawabari)
 
 ImageClipper::ImageClipper(const cv::Mat& image, bool is_nawabari)
     : is_nawabari_(is_nawabari),
-      my_index_(-1),
       image_(image) {
   cv::cvtColor(image, gray_image_, CV_RGB2GRAY);
   calculateRect();
@@ -154,9 +163,11 @@ void ImageClipper::calculateRectInternal(int index, bool is_player) {
 }
 
 void ImageClipper::calculateRect() {
-  my_index_ = FindMyIndex(gray_image_);
+  FindMyIndex(gray_image_, status_);
   for (int i = 0; i < 8; ++i) {
-    calculateRectInternal(i, i == my_index_);
+    if (status_[i] == VACANCY)
+      continue;
+    calculateRectInternal(i, status_[i] == YOU);
   }
 }
 
@@ -164,6 +175,8 @@ cv::Mat ImageClipper::GetDebugImage(bool with_rect) const {
   cv::Mat result = image_.clone();
   if (with_rect) {
     for (int i = 0; i < 8; ++i) {
+      if (status_[i] == VACANCY)
+        continue;
       const ClippingRect& rect = rects_[i];
 
       cv::rectangle(result, rect.result.tl(), rect.result.br(),
@@ -201,6 +214,8 @@ void ImageClipper::ShowDebugImage(bool with_rect) const {
 
 void ImageClipper::clippingImage() {
   for (int i = 0; i < 8; ++i) {
+    if (status_[i] == VACANCY)
+      continue;
     clippingImageInternal(i);
   }
 }

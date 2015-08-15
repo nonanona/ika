@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 
+#include "util/debugger.h"
 #include "glog/logging.h"
 #include "scene_analyzer/battle_scene_analyzer.h"
 
