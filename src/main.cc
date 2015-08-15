@@ -8,6 +8,7 @@
 #include "component_extract_command.h"
 #include "read_result_command.h"
 #include "scene_extractor_command.h"
+#include "learning_command.h"
 
 
 int main(int argc, char** argv) {
@@ -17,6 +18,7 @@ int main(int argc, char** argv) {
     new SceneExtractorCommand(),
     new ReadResultCommand(),
     new ComponentExtractCommand(),
+    new LearningCommand(),
   };
 
   const std::string command(argc == 1 ? "" : argv[1]);

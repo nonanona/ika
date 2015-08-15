@@ -1,16 +1,15 @@
 #include "ocr/result_page_reader.h"
 
+#include "util/util.h"
+
 ResultPageReader::ResultPageReader()
     : is_nawabari_(false),
       image_clipper_(NULL),
-      killdeath_classifier_(
-          new Classifier("res/kill_death_param", 1.1)),
       paintpoint_classifier_(NULL) {
 }
 
 ResultPageReader::~ResultPageReader() {
   delete paintpoint_classifier_;
-  delete killdeath_classifier_;
   delete image_clipper_;
 }
 
@@ -40,16 +39,18 @@ int ResultPageReader::ReadKillCount(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
   int result[2] = {};
-  PredictImages(image.kill, result, 2, killdeath_classifier_);
-  return (result[0] % 10) * 10 + (result[1] % 10);
+  result[0] = killdeath_classifier_.Predict(image.kill[0]);
+  result[1] = killdeath_classifier_.Predict(image.kill[1]);
+  return result[0] * 10 + result[1];
 }
 
 int ResultPageReader::ReadDeathCount(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
   int result[2] = {};
-  PredictImages(image.death, result, 2, killdeath_classifier_);
-  return (result[0] % 10) * 10 + (result[1] % 10);
+  result[0] = killdeath_classifier_.Predict(image.death[0]);
+  result[1] = killdeath_classifier_.Predict(image.death[1]);
+  return result[0] * 10 + result[1];
 }
 
 int ResultPageReader::ReadPaintPoint(int index) const {
