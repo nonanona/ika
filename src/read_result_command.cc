@@ -36,8 +36,16 @@ void ReadResultCommand::Run() {
   cv::Mat result_image = cv::imread(image_path_.c_str());
   rpr.LoadImage(result_image);
 
+  bool is_win = false;
+  for (int i = 0; i < 8; ++i) {
+    if (rpr.GetPlayerStatus(i) == ImageClipper::YOU) {
+      is_win = i < 4;
+      break;
+    }
+  }
+
   printf("Game:\n");
-  printf("  Result: %s\n", rpr.GetMyPosition() < 4 ? "YOU WIN" : "YOU LOSE");
+  printf("  Result: %s\n", is_win ? "YOU WIN" : "YOU LOSE");
   printer::PrintGameResult(rpr);
 
   if (is_debug_)
