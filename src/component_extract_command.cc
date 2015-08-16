@@ -10,6 +10,7 @@
 #include "util/debugger.h"
 #include "ocr/image_clipper.h"
 #include "ocr/classifier.h"
+#include "ocr/killdeath_classifier.h"
 
 ComponentExtractCommand::ComponentExtractCommand() {
 }
@@ -69,15 +70,24 @@ int ComponentExtractCommand::GetNearestFileIndex(int index,
   return -1;
 }
 
-int PredictImage(const cv::Mat& image) {
-    static Classifier* cls = NULL;
-    if (cls == NULL) {
-       cls = new Classifier("res/kill_death_param", 1.1);
-    }
+int PredictKillDeathImage(const cv::Mat& image) {
+  static KillDeathClassifier* cls = NULL;
+  if (cls == NULL) {
+     cls = new KillDeathClassifier();
+  }
 
-    cv::Mat buf;
-    cv::Canny(image, buf, 50, 200);
-    return cls->Predict(buf, 0.5);
+  return cls->Predict(image);
+}
+
+int PredictPaintPointImage(const cv::Mat& image) {
+  static Classifier* cls = NULL;
+  if (cls == NULL) {
+     cls = new Classifier("res/point_param", 2.0);
+  }
+
+  cv::Mat buf;
+  cv::Canny(image, buf, 50, 200);
+  return cls->Predict(buf, 0.5);
 }
 
 void ComponentExtractCommand::SaveToFile(const std::string& path) {
@@ -92,13 +102,16 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
   const std::string kKillDeathDir = output_dir_ + "/killdeath/";
   MakeSureDirExists(kKillDeathDir);
 
+  const std::string kPaintPointDir = output_dir_ + "/paintpoint/";
+  MakeSureDirExists(kPaintPointDir);
+
   for (int i = 0; i < 10; ++i) {
     std::string subdir = kKillDeathDir + (char)('0' + i);
     MakeSureDirExists(subdir);
-  }
 
-  const std::string kPaintPointDir = output_dir_ + "/paintpoint";
-  MakeSureDirExists(kPaintPointDir);
+    subdir = kPaintPointDir + (char)('0' + i);
+    MakeSureDirExists(subdir);
+  }
 
   ImageClipper ic(path, is_nawabari_);
 
@@ -114,28 +127,28 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
     weapon_index_ = GetNearestFileIndex(weapon_index_, kWeaponDir, &path);
     cv::imwrite(path, image.weapon);
 
-    predict[0] = '0' + PredictImage(image.kill[0]);
+    predict[0] = '0' + PredictKillDeathImage(image.kill[0]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.kill[0], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.kill[0]);
 
-    predict[0] = '0' + PredictImage(image.kill[1]);
+    predict[0] = '0' + PredictKillDeathImage(image.kill[1]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.kill[1], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.kill[1]);
 
-    predict[0] = '0' + PredictImage(image.death[0]);
+    predict[0] = '0' + PredictKillDeathImage(image.death[0]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.death[0], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.death[0]);
 
-    predict[0] = '0' + PredictImage(image.death[1]);
+    predict[0] = '0' + PredictKillDeathImage(image.death[1]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.death[1], &tmp);
@@ -144,8 +157,10 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
 
     if (is_nawabari_) {
       for (int i = 0; i < 4; ++i) {
+        predict[0] = '0' + PredictPaintPointImage(image.point[i]);
         paintpoint_index_ =
-            GetNearestFileIndex(paintpoint_index_, kPaintPointDir, &path);
+            GetNearestFileIndex(paintpoint_index_,
+                                kPaintPointDir + predict, &path);
         ExtractWhite(image.point[i], &tmp);
         if (!IsBlackImage(tmp))
           cv::imwrite(path, tmp);
