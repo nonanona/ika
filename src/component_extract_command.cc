@@ -9,8 +9,8 @@
 #include "util/ioutil.h"
 #include "util/debugger.h"
 #include "ocr/image_clipper.h"
-#include "ocr/classifier.h"
 #include "ocr/killdeath_classifier.h"
+#include "ocr/paintpoint_classifier.h"
 
 ComponentExtractCommand::ComponentExtractCommand() {
 }
@@ -80,14 +80,11 @@ int PredictKillDeathImage(const cv::Mat& image) {
 }
 
 int PredictPaintPointImage(const cv::Mat& image) {
-  static Classifier* cls = NULL;
+  static PaintPointClassifier* cls = NULL;
   if (cls == NULL) {
-     cls = new Classifier("res/point_param", 2.0);
+     cls = new PaintPointClassifier();
   }
-
-  cv::Mat buf;
-  cv::Canny(image, buf, 50, 200);
-  return cls->Predict(buf, 0.5);
+  return cls->Predict(image);
 }
 
 void ComponentExtractCommand::SaveToFile(const std::string& path) {

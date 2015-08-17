@@ -7,7 +7,6 @@
 
 #include "util/util.h"
 #include "util/debugger.h"
-#include "ocr/classifier.h"
 #include "ocr/image_clipper.h"
 #include <glog/logging.h>
 

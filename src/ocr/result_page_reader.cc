@@ -21,15 +21,6 @@ void ResultPageReader::LoadImage(const cv::Mat& image) {
   image_clipper_ = new ImageClipper(image, is_nawabari_);
 }
 
-void ResultPageReader::PredictImages(
-    const cv::Mat* images, int* out, int length, Classifier* classifier) const {
-  cv::Mat buf;
-  for (int i = 0; i < length; ++i) {
-    cv::Canny(images[i], buf, 50, 200);
-    out[i] = classifier->Predict(buf, 0.7);
-  }
-}
-
 int ResultPageReader::ReadKillCount(int index) const {
   const ImageClipper::ClippedImage& image = image_clipper_->getImage(index);
   cv::Mat buf;
