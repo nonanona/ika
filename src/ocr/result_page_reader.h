@@ -2,6 +2,7 @@
 
 #include "ocr/classifier.h"
 #include "ocr/killdeath_classifier.h"
+#include "ocr/paintpoint_classifier.h"
 #include "ocr/image_clipper.h"
 
 class ResultPageReader {
@@ -30,5 +31,5 @@ class ResultPageReader {
   bool is_nawabari_;
   ImageClipper* image_clipper_;
   KillDeathClassifier killdeath_classifier_;
-  Classifier* paintpoint_classifier_;
+  PaintPointClassifier paintpoint_classifier_;
 };

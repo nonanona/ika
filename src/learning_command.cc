@@ -12,7 +12,8 @@
 #include "ocr/result_page_reader.h"
 #include "ocr/title_page_reader.h"
 #include "ocr/name_tracker.h"
-#include "ocr/classifier.h"
+#include "ocr/killdeath_classifier.h"
+#include "ocr/paintpoint_classifier.h"
 #include "scene_analyzer/game_scene_extractor.h"
 #include "printer.h"
 
@@ -148,7 +149,15 @@ double LearningCommand::DoLearning(double criteria) {
         << train_files[i].size() << " / " << verify_files[i].size();
   }
 
-  cv::Size data_size = cv::imread(train_files[0][0], 0).size();
+  cv::Mat sample;
+  if (mode_ == KILL_DEATH)
+    KillDeathClassifier::Prepare(cv::imread(train_files[0][0]), &sample);
+  else if (mode_ == PAINT_POINT)
+    PaintPointClassifier::Prepare(cv::imread(train_files[0][0]), &sample);
+  else
+    abort();
+
+  cv::Size data_size = sample.size();
   cv::Mat train_data(train_image_count, data_size.width * data_size.height,
                      CV_32FC1);
   cv::Mat train_label(train_image_count, 1, CV_32SC1);
@@ -157,7 +166,12 @@ double LearningCommand::DoLearning(double criteria) {
   for (int i = 0; i < 10; ++i) {
     for (size_t j = 0; j < train_files[i].size(); ++j) {
       cv::Mat tmp;
-      KillDeathClassifier::Prepare(cv::imread(train_files[i][j]), &tmp);
+      if (mode_ == KILL_DEATH)
+        KillDeathClassifier::Prepare(cv::imread(train_files[i][j]), &tmp);
+      else if (mode_ == PAINT_POINT)
+        PaintPointClassifier::Prepare(cv::imread(train_files[i][j]), &tmp);
+      else
+        abort();
 
       for (int ii = 0; ii < tmp.cols; ++ii) {
         train_data.at<float>(train_line, ii) = tmp.at<float>(0, ii);
@@ -182,7 +196,12 @@ double LearningCommand::DoLearning(double criteria) {
     int correct_count = 0;
     for (size_t j = 0; j < verify_files[i].size(); ++j) {
       cv::Mat tmp;
-      KillDeathClassifier::Prepare(cv::imread(verify_files[i][j]), &tmp);
+      if (mode_ == KILL_DEATH)
+        KillDeathClassifier::Prepare(cv::imread(verify_files[i][j]), &tmp);
+      else if (mode_ == PAINT_POINT)
+        PaintPointClassifier::Prepare(cv::imread(verify_files[i][j]), &tmp);
+      else
+        abort();
       if (svm->predict(tmp) == i) {
         correct_count++;
         total_correct++;
