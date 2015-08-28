@@ -11,7 +11,8 @@
 #include "ocr/title_page_reader.h"
 #include "ocr/name_tracker.h"
 #include "scene_analyzer/game_scene_extractor.h"
-#include "printer.h"
+#include "template/output_handler.h"
+#include "template/stdout_output_handler.h"
 
 SceneExtractorCommand::SceneExtractorCommand() {
 }
@@ -39,6 +40,8 @@ void SceneExtractorCommand::Run() {
   TitlePageReader tpr;
   NameTracker tracker;
 
+  OutputHandler* handler = new StdoutOutputHandler();
+
   int battle_id = 0;
   int64_t frame = 0;
   while (true) {
@@ -62,6 +65,9 @@ void SceneExtractorCommand::Run() {
     gse.GetImageAt(result_pos, &result_image);
     rpr.LoadImage(result_image);
 
+    handler->PushBattleId(battle_id, tpr.ReadRule(), tpr.ReadMap());
+    handler->PushBattleSceneInfo(battle_id, region);
+
     int name_ids[8];
     int my_position;
     for (int i = 0; i < 8; ++i) {
@@ -71,15 +77,13 @@ void SceneExtractorCommand::Run() {
       else if (player_status == ImageClipper::YOU)
         my_position = i;
       name_ids[i] = tracker.GetNameId(rpr.GetNameImage(i));
+      handler->PushPlayerNameId(rpr.GetNameImage(i), name_ids[i]);
+      handler->PushBattleResult(
+          battle_id, name_ids[i], i, rpr.ReadKillCount(i),
+          rpr.ReadDeathCount(i),
+          rpr.is_nawabari() ? rpr.ReadPaintPoint(i): -1,
+          rpr.GetPlayerStatus(i));
     }
-
-    printf("Game %d:\n", battle_id);
-    printf("  Rule: %s\n", tpr.GetRuleString(tpr.ReadRule()));
-    printf("  Map : %s\n", tpr.GetMapString(tpr.ReadMap()));
-    printf("  Result: %s\n", my_position < 4 ? "YOU WIN" : "YOU LOSE");
-    printer::PrintGameSceneSummary(region);
-    printer::PrintGameResultWithID(rpr, name_ids);
-    fflush(stdout);
 
     if (!battle_result_dir_.empty()) {
       char buf[260];
@@ -96,6 +100,8 @@ void SceneExtractorCommand::Run() {
       printf("Saving Battle results image to %s\n", buf);
       cv::imwrite(buf, result_image);
     }
+
+    handler->MaybeFlush();
 
     if (is_debug_)
       rpr.ShowDebugImage(true);

@@ -15,7 +15,6 @@
 #include "ocr/killdeath_classifier.h"
 #include "ocr/paintpoint_classifier.h"
 #include "scene_analyzer/game_scene_extractor.h"
-#include "printer.h"
 
 LearningCommand::LearningCommand() : xv_ratio_(0.2), train_count_(-1) {
 }

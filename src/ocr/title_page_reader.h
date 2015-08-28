@@ -8,13 +8,15 @@ class TitlePageReader {
   ~TitlePageReader();
 
   enum Rule {
+    UNKNOWN_RULE = 0,
     NAWABARI,
     AREA,
     YAGURA,
   };
 
   enum Map {
-    URCHIN_UNDERPASS = 0,  // DEKARAIN KOUKASHITA
+    UNKNOWN_MAP = 0,
+    URCHIN_UNDERPASS,  // DEKARAIN KOUKASHITA
     WALLEYE_WAREHOUSE,  // HAKOFUGU DEPOT
     SALTSPRAY_RIG,  // SIONOME YUDEN
     AROWANA_MALL,  // AROWANA MALL

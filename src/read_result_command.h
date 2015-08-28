@@ -23,4 +23,5 @@ class ReadResultCommand : public Command {
 
   std::string image_path_;
   bool is_debug_;
+  bool is_nawabari_;
 };

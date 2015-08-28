@@ -228,6 +228,8 @@ TitlePageReader::Rule TitlePageReader::DetectRule(
 // static
 const char* TitlePageReader::GetRuleString(TitlePageReader::Rule rule) {
   switch (rule) {
+    case UNKNOWN_RULE:
+      return "UNKNOWN";
     case NAWABARI:
       return "\xE3\x83\x8A\xE3\x83\xAF\xE3\x83\x90\xE3\x83\xAA\xE3\x83\x90"
           "\xE3\x83\x88\xE3\x83\xAB";
@@ -243,6 +245,8 @@ const char* TitlePageReader::GetRuleString(TitlePageReader::Rule rule) {
 // static
 const char* TitlePageReader::GetMapString(TitlePageReader::Map map) {
   switch (map) {
+    case UNKNOWN_MAP:
+      return "UNKNOWN";
     case URCHIN_UNDERPASS:
       return "\xE3\x83\x87\xE3\x82\xAB\xE3\x83\xA9\xE3\x82\xA4\xE3\x83\xB3"
           "\xE9\xAB\x98\xE6\x9E\xB6\xE4\xB8\x8B";
