@@ -12,7 +12,7 @@
 #include "ocr/name_tracker.h"
 #include "scene_analyzer/game_scene_extractor.h"
 #include "template/output_handler.h"
-#include "template/stdout_output_handler.h"
+#include "template/redirect_output_handler.h"
 
 SceneExtractorCommand::SceneExtractorCommand() {
 }
@@ -40,7 +40,7 @@ void SceneExtractorCommand::Run() {
   TitlePageReader tpr;
   NameTracker tracker;
 
-  OutputHandler* handler = new StdoutOutputHandler();
+  OutputHandler* handler = new RedirectOutputHandler();
 
   int battle_id = 0;
   int64_t frame = 0;
