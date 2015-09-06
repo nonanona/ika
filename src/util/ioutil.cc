@@ -1,5 +1,6 @@
 #include "util/ioutil.h"
 
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <glog/logging.h>
 
