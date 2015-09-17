@@ -17,6 +17,13 @@ RedirectOutputHandler::RedirectOutputHandler(
 }
 
 RedirectOutputHandler::~RedirectOutputHandler() {
+  for (size_t i = 0; i < handlers_.size(); ++i) {
+    delete handlers_[i];
+  }
+}
+
+void RedirectOutputHandler::AddHandler(OutputHandler* handler) {
+  handlers_.push_back(handler);
 }
 
 void RedirectOutputHandler::Initialize() {

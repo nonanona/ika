@@ -143,6 +143,7 @@ TitlePageReader::TitlePageReader()
   LOAD_IMAGE(BLUEFIN_DEPOT, "bluefin_depot");
   LOAD_IMAGE(MORAY_TOWERS, "moray_towers");
   LOAD_IMAGE(CAMP_TRIGGERFISH, "camp_triggerfish");
+  LOAD_IMAGE(HIRAME, "hirame");
 #undef LOAD_IMAGE
 }
 
@@ -274,6 +275,9 @@ const char* TitlePageReader::GetMapString(TitlePageReader::Map map) {
     case CAMP_TRIGGERFISH:
       return "\xE3\x83\xA2\xE3\x83\xB3\xE3\x82\xAC\xE3\x83\xA9\xE3\x82\xAD"
           "\xE3\x83\xA3\xE3\x83\xB3\xE3\x83\x97\xE5\xA0\xB4";
+    case HIRAME:
+      return "\xE3\x83\x92\xE3\x83\xA9\xE3\x83\xA1\xE3\x81\x8C\xE4\xB8\x98"
+          "\xE5\x9B\xA3\xE5\x9C\xB0";
     default:
       abort();
   }

@@ -24,5 +24,6 @@ class SceneExtractorCommand : public Command {
   std::string video_path_;
   std::string battle_result_dir_;
   std::string title_result_dir_;
+  std::string ffmpeg_output_file_;
   bool is_debug_;
 };

@@ -13,6 +13,7 @@
 #include "scene_analyzer/game_scene_extractor.h"
 #include "template/output_handler.h"
 #include "template/redirect_output_handler.h"
+#include "template/ffmpeg_output_handler.h"
 
 SceneExtractorCommand::SceneExtractorCommand() {
 }
@@ -25,6 +26,7 @@ bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
                                    "--battle-out-dir");
+  ffmpeg_output_file_ = GetCmdOption(argv + 1, argv + argc, "--ffmpeg");
   return !video_path_.empty();
 }
 
@@ -40,7 +42,13 @@ void SceneExtractorCommand::Run() {
   TitlePageReader tpr;
   NameTracker tracker;
 
-  OutputHandler* handler = new RedirectOutputHandler();
+  RedirectOutputHandler* handler = new RedirectOutputHandler();
+
+  if (!ffmpeg_output_file_.empty()) {
+      handler->AddHandler(
+          new FfmpegOutputHandler(ffmpeg_output_file_, video_path_));
+  }
+
 
   int battle_id = 0;
   int64_t frame = 0;

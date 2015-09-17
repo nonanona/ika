@@ -1,23 +1,18 @@
-#pragma once
+#pragma once 
 
-#include <vector>
 #include "template/output_handler.h"
 
-class RedirectOutputHandler : public OutputHandler {
+class FfmpegOutputHandler : public OutputHandler {
  public:
-  RedirectOutputHandler();
-  RedirectOutputHandler(std::string html_output_path,
-                        bool also_output_to_stdout);
-
-  void AddHandler(OutputHandler* handler);
-
-  virtual ~RedirectOutputHandler();
+  FfmpegOutputHandler(const std::string& out_file,
+                      const std::string& video_path);
+  virtual ~FfmpegOutputHandler();
 
   virtual void Initialize();
   virtual void Finalize();
-
   virtual void PushBattleId(int battle_id, TitlePageReader::Rule,
                             TitlePageReader::Map);
+
   virtual void PushPlayerNameId(const cv::Mat& name_img, int name_id);
   virtual void PushBattleSceneInfo(
       int battle_id, const GameSceneExtractor::GameRegion& region);
@@ -26,6 +21,7 @@ class RedirectOutputHandler : public OutputHandler {
                                 ImageClipper::PlayerStatus status);
   virtual void MaybeFlush();
 
-private:
-  std::vector<OutputHandler*> handlers_;
+ private:
+  FILE* fp_;
+  std::string video_filename_;
 };

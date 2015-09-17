@@ -26,6 +26,7 @@ class TitlePageReader {
     BLUEFIN_DEPOT,  // NEGITORO TANKO
     MORAY_TOWERS,   // TACHIUO PARKING
     CAMP_TRIGGERFISH,  // MONGARA CAMP
+    HIRAME,
 
     NUM_OF_MAPS,
   };
