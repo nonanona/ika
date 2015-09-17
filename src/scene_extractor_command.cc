@@ -62,7 +62,7 @@ void SceneExtractorCommand::Run() {
         region.title_frame.start + region.title_frame.duration / 2;
     for (int i = 0; i < 4; ++i) {
       image_sequence[i] = cv::Mat();
-      gse.GetImageAt(title_frame + (i - 2) * 8, &image_sequence[i]);
+      gse.GetImageAt(title_frame + (i - 2) * 16, &image_sequence[i]);
     }
     tpr.LoadImageSequence(image_sequence);
 

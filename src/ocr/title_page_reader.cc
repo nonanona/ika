@@ -156,6 +156,7 @@ void TitlePageReader::LoadImageSequence(const std::vector<cv::Mat>& images) {
     cv::Mat tmp2;
     cv::cvtColor(images[i], tmp, CV_RGB2GRAY);
     cv::threshold(tmp, tmp2, 0xE0, 0xFF, CV_THRESH_BINARY);
+    ShowAndWaitKey(tmp2);
     if (i == 0)
       image_ = tmp2;
     else
@@ -169,6 +170,7 @@ void TitlePageReader::LoadImageSequence(const std::vector<cv::Mat>& images) {
 
   cv::Mat rule_image = image_(rule_rect_);
   cv::Rect trimmed_rule_rect;
+  ShowAndWaitKey(rule_image);
   TrimBlankImage(rule_image, &trimmed_rule_rect);
   rule_image = rule_image(trimmed_rule_rect);
   rule_ = DetectRule(rule_image, trimmed_rule_rect);

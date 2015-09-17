@@ -8,6 +8,7 @@ class WhiteoutSceneAnalyzer : public SceneAnalyzer::Interface {
  public:
   WhiteoutSceneAnalyzer(const cv::Size& size);
   virtual ~WhiteoutSceneAnalyzer();
+  virtual void drawDebugInfo(cv::Mat* frame);
   virtual bool IsScene(const cv::Mat& frame);
 
  private:

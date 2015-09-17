@@ -6,13 +6,13 @@
 
 class ResultSceneAnalyzer : public SceneAnalyzer::Interface {
  public:
-  ResultSceneAnalyzer();
+  ResultSceneAnalyzer(const cv::Size& size);
   virtual ~ResultSceneAnalyzer();
+  virtual void drawDebugInfo(cv::Mat* frame);
   virtual bool IsScene(const cv::Mat& frame);
 
  private:
-  const cv::Rect win_rec_;
-  const cv::Mat win_white_;
-  const cv::Mat win_mask_;
+  cv::Rect win_rec_;
+  cv::Mat win_;
 };
 

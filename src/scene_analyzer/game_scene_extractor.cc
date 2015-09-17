@@ -114,6 +114,15 @@ bool GameSceneExtractor::FindBattleEnd(int64_t current_battle_frame,
       target_msec += 30 * 1000;
     } else {
       VLOG(3) << "Find non battle field roughly at " << target_msec;
+      VLOG(3) << "check 3sec after since blackout may happen in battle.";
+      vc_->set(CV_CAP_PROP_POS_MSEC, target_msec + 3000);
+      vc_->read(frame_img);
+
+      if (analyzer_->IsBattleScene(frame_img)) {
+        VLOG(3) << "Yeah, still in battle, seach next 30 sec.";
+        target_msec += 30 * 1000;
+        continue;
+      }
       break;
     }
   }

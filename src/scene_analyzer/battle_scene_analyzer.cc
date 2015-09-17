@@ -1,46 +1,40 @@
 #include <opencv2/opencv.hpp>
 
 #include "util/debugger.h"
+#include "util/util.h"
 #include "glog/logging.h"
 #include "scene_analyzer/battle_scene_analyzer.h"
 
-BattleSceneAnalyzer::BattleSceneAnalyzer()
-    : clock_rec_(80, 45, 60, 60),
-      clock_white_(cv::imread("res/clock_white.bmp", CV_LOAD_IMAGE_GRAYSCALE)),
-      clock_black_(cv::imread("res/clock_black.bmp", CV_LOAD_IMAGE_GRAYSCALE)) {
+BattleSceneAnalyzer::BattleSceneAnalyzer(const cv::Size& size) {
+  if (size.width == 1920 && size.height == 1080) {
+    clock_rec_ = cv::Rect(89, 49, 44, 51);
+    clock_ = cv::imread("res/clock.png", CV_LOAD_IMAGE_GRAYSCALE);
+  } else if (size.width == 1280 && size.height == 720) {
+    clock_rec_ = cv::Rect(53, 30, 40, 40);
+    clock_ = cv::imread("res720/clock.png", CV_LOAD_IMAGE_GRAYSCALE);
+  } else {
+    LOG(ERROR) << "Unsupported image size: "
+        << size.width << "x" << size.height;
+    abort();
+  }
 }
 
 BattleSceneAnalyzer::~BattleSceneAnalyzer() {
 }
 
+void BattleSceneAnalyzer::drawDebugInfo(cv::Mat* frame) {
+  cv::rectangle(*frame, clock_rec_.tl(), clock_rec_.br(),
+                cv::Scalar(0x00, 0xFF, 0xFF), 2, 8);
+}
+
 bool BattleSceneAnalyzer::IsScene(const cv::Mat& frame_img) {
   cv::Mat clock(frame_img, clock_rec_);
   cv::Mat clock_gray;
-  cvtColor(clock, clock_gray, CV_RGB2GRAY);
+  ExtractWhite(clock, &clock_gray);
+  if (IsBlackImage(clock_gray))
+    return false;
 
-  cv::Size clock_size = clock_gray.size();
-  int white_diff = 0;
-  int black_diff = 0;
-  int total_white_cnt = 0;
-  int total_black_cnt = 0;
-  for (int i = 0; i < clock_size.height; ++i) {
-    const uchar* line_white = clock_white_.ptr<uchar>(i);
-    const uchar* line_black = clock_black_.ptr<uchar>(i);
-    const uchar* line_org = clock_gray.ptr<uchar>(i);
-    for (int j = 0; j < clock_size.width; ++j) {
-      if (line_white[j] == 0xFF) {
-        white_diff += (0xFF - line_org[j]) * (0xFF - line_org[j]);
-        total_white_cnt++;
-      }
-      if (line_black[j] == 0x00) {
-        black_diff += line_org[j] * line_org[j];
-        total_black_cnt++;
-      }
-    }
-  }
-  double white_diff_ratio =
-      static_cast<double>(white_diff) / (65025.0 * total_white_cnt);
-  double black_diff_ratio =
-      static_cast<double>(black_diff) / (65025.0 * total_black_cnt);
-  return (white_diff_ratio < 0.05 && black_diff_ratio < 0.05);
+  cv::Size size = clock_gray.size();
+  double r = ImageDiff(clock_, clock_gray);
+  return r < 0.05;
 }

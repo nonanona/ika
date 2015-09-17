@@ -16,6 +16,9 @@ BlackoutSceneAnalyzer::BlackoutSceneAnalyzer(const cv::Size& size)
 BlackoutSceneAnalyzer::~BlackoutSceneAnalyzer() {
 }
 
+void BlackoutSceneAnalyzer::drawDebugInfo(cv::Mat* frame) {
+}
+
 bool BlackoutSceneAnalyzer::IsScene(const cv::Mat& frame) {
   cv::Mat win(frame, rec_);
 

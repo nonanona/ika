@@ -6,14 +6,14 @@
 
 class BattleSceneAnalyzer : public SceneAnalyzer::Interface {
  public:
-  BattleSceneAnalyzer();
+  BattleSceneAnalyzer(const cv::Size& size);
   virtual ~BattleSceneAnalyzer();
+  virtual void drawDebugInfo(cv::Mat* frame);
   virtual bool IsScene(const cv::Mat& frame);
 
  private:
-  const cv::Rect clock_rec_;
-  const cv::Mat clock_black_;
-  const cv::Mat clock_white_;
-  const cv::Mat clock_mask_;
+  int mode_;
+  cv::Rect clock_rec_;
+  cv::Mat clock_;
 };
 

@@ -5,14 +5,16 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "util/debugger.h"
+
 #include "scene_analyzer/battle_scene_analyzer.h"
 #include "scene_analyzer/result_scene_analyzer.h"
 #include "scene_analyzer/blackout_scene_analyzer.h"
 #include "scene_analyzer/whiteout_scene_analyzer.h"
 
 SceneAnalyzer::SceneAnalyzer(const cv::Size& size)
-    : battle_analyzer_(new BattleSceneAnalyzer()),
-      result_analyzer_(new ResultSceneAnalyzer()),
+    : battle_analyzer_(new BattleSceneAnalyzer(size)),
+      result_analyzer_(new ResultSceneAnalyzer(size)),
       blackout_analyzer_(new BlackoutSceneAnalyzer(size)),
       whiteout_analyzer_(new WhiteoutSceneAnalyzer(size)) {
 }

@@ -8,6 +8,8 @@ class BlackoutSceneAnalyzer : public SceneAnalyzer::Interface {
  public:
   BlackoutSceneAnalyzer(const cv::Size& size);
   virtual ~BlackoutSceneAnalyzer();
+
+  virtual void drawDebugInfo(cv::Mat* frame);
   virtual bool IsScene(const cv::Mat& frame);
 
  private:

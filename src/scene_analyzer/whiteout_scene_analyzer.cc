@@ -17,6 +17,9 @@ WhiteoutSceneAnalyzer::WhiteoutSceneAnalyzer(const cv::Size& size)
 WhiteoutSceneAnalyzer::~WhiteoutSceneAnalyzer() {
 }
 
+void WhiteoutSceneAnalyzer::drawDebugInfo(cv::Mat* frame) {
+}
+
 bool WhiteoutSceneAnalyzer::IsScene(const cv::Mat& frame) {
   cv::Mat win(frame, rec_);
 

@@ -11,6 +11,7 @@ class SceneAnalyzer {
    public:
     Interface() {}
     virtual ~Interface() {}
+    virtual void drawDebugInfo(cv::Mat* frame) = 0;
     virtual bool IsScene(const cv::Mat& frame) = 0;
   };
 
