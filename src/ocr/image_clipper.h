@@ -8,8 +8,8 @@ class Classifier;
 
 class ImageClipper {
  public:
-  ImageClipper(const std::string& fname, bool is_nawabari);
-  ImageClipper(const cv::Mat& image, bool is_nawabari);
+  ImageClipper(const std::string& fname);
+  ImageClipper(const cv::Mat& image);
   virtual ~ImageClipper();
 
   enum PlayerStatus {
@@ -19,7 +19,7 @@ class ImageClipper {
   };
 
   struct ClippingRect {
-    cv::Rect result;
+    cv::Rect frame;
     cv::Rect name;
     cv::Rect weapon;
     cv::Rect point[4];
@@ -44,23 +44,25 @@ class ImageClipper {
     return images_[index];
   }
 
-  void ShowDebugImage(bool with_rect) const;
-  cv::Mat GetDebugImage(bool with_rect) const;
+  bool IsNawabari() const {
+    return is_nawabari_;
+  }
+
+  void ShowDebugImage(const cv::Mat& image) const;
+  cv::Mat DrawDebugInfo(const cv::Mat& image) const;
 
   PlayerStatus GetPlayerStatus(int i ) const {
     return status_[i];
   }
 
  private:
-  void calculateRect();
-  void calculateRectInternal(int i, bool is_player);
-  void clippingImage();
-  void clippingImageInternal(int i);
+  void calcRect(const cv::Mat& image);
+  void calcRect720(const cv::Mat& image);
+  void calcRect1080(const cv::Mat& image);
+  void clipImage(const cv::Mat& image);
 
-  const bool is_nawabari_;
+  bool is_nawabari_;
   PlayerStatus status_[8];
-  cv::Mat image_;
-  cv::Mat gray_image_;
   ClippingRect rects_[8];
   ClippedImage images_[8];
 };

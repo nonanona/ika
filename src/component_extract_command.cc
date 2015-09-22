@@ -21,9 +21,9 @@ ComponentExtractCommand::~ComponentExtractCommand() {
 bool ComponentExtractCommand::ProcessArgs(int argc, char** argv) {
   image_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
   output_dir_ = GetCmdOption(argv + 1, argv + argc, "-o");
-  is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   is_overwrite_ = HasCmdOption(argv + 1, argv + argc, "--overwrite");
+  predict_ = HasCmdOption(argv + 1, argv + argc, "--predict");
   return !image_path_.empty() && !output_dir_.empty();
 }
 
@@ -110,7 +110,7 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
     MakeSureDirExists(subdir);
   }
 
-  ImageClipper ic(path, is_nawabari_);
+  ImageClipper ic(path);
 
   char predict[2] = {};
   cv::Mat tmp;
@@ -124,37 +124,42 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
     weapon_index_ = GetNearestFileIndex(weapon_index_, kWeaponDir, &path);
     cv::imwrite(path, image.weapon);
 
-    predict[0] = '0' + PredictKillDeathImage(image.kill[0]);
+    if (predict_)
+      predict[0] = '0' + PredictKillDeathImage(image.kill[0]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.kill[0], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.kill[0]);
 
-    predict[0] = '0' + PredictKillDeathImage(image.kill[1]);
+    if (predict_)
+      predict[0] = '0' + PredictKillDeathImage(image.kill[1]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.kill[1], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.kill[1]);
 
-    predict[0] = '0' + PredictKillDeathImage(image.death[0]);
+    if (predict_)
+      predict[0] = '0' + PredictKillDeathImage(image.death[0]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.death[0], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.death[0]);
 
-    predict[0] = '0' + PredictKillDeathImage(image.death[1]);
+    if (predict_)
+      predict[0] = '0' + PredictKillDeathImage(image.death[1]);
     kill_death_index_ =
         GetNearestFileIndex(kill_death_index_, kKillDeathDir + predict, &path);
     ExtractWhite(image.death[1], &tmp);
     if (!IsBlackImage(tmp))
       cv::imwrite(path, image.death[1]);
 
-    if (is_nawabari_) {
+    if (ic.IsNawabari()) {
       for (int i = 0; i < 4; ++i) {
-        predict[0] = '0' + PredictPaintPointImage(image.point[i]);
+        if (predict_)
+          predict[0] = '0' + PredictPaintPointImage(image.point[i]);
         paintpoint_index_ =
             GetNearestFileIndex(paintpoint_index_,
                                 kPaintPointDir + predict, &path);

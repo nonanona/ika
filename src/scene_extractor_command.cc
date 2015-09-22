@@ -23,7 +23,6 @@ SceneExtractorCommand::~SceneExtractorCommand() {
 
 bool SceneExtractorCommand::ProcessArgs(int argc, char** argv) {
   video_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
-  is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   battle_result_dir_ = GetCmdOption(argv + 1, argv + argc,
                                    "--battle-out-dir");
   ffmpeg_output_file_ = GetCmdOption(argv + 1, argv + argc, "--ffmpeg");
@@ -49,7 +48,6 @@ void SceneExtractorCommand::Run() {
           new FfmpegOutputHandler(ffmpeg_output_file_, video_path_));
   }
 
-
   int battle_id = 0;
   int64_t frame = 0;
   while (true) {
@@ -57,16 +55,12 @@ void SceneExtractorCommand::Run() {
     if (!gse.FindNearestGameRegion(frame, &region))
       return;
 
-    std::vector<cv::Mat> image_sequence(4);
+    cv::Mat title_image;
     int64_t title_frame =
         region.title_frame.start + region.title_frame.duration / 2;
-    for (int i = 0; i < 4; ++i) {
-      image_sequence[i] = cv::Mat();
-      gse.GetImageAt(title_frame + (i - 2) * 16, &image_sequence[i]);
-    }
-    tpr.LoadImageSequence(image_sequence);
+    gse.GetImageAt(title_frame, &title_image);
+    tpr.LoadImage(title_image);
 
-    rpr.SetIsNawabari(tpr.ReadRule() == TitlePageReader::NAWABARI);
     cv::Mat result_image;
     const int64_t result_pos =
         region.result_frame.start + region.result_frame.duration / 2;
@@ -89,7 +83,7 @@ void SceneExtractorCommand::Run() {
       handler->PushBattleResult(
           battle_id, name_ids[i], i, rpr.ReadKillCount(i),
           rpr.ReadDeathCount(i),
-          rpr.is_nawabari() ? rpr.ReadPaintPoint(i): -1,
+          rpr.IsNawabari() ? rpr.ReadPaintPoint(i): -1,
           rpr.GetPlayerStatus(i));
     }
 
@@ -110,9 +104,6 @@ void SceneExtractorCommand::Run() {
     }
 
     handler->MaybeFlush();
-
-    if (is_debug_)
-      rpr.ShowDebugImage(true);
 
     battle_id++;
     frame = region.game_frame.start + region.game_frame.duration;

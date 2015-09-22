@@ -10,170 +10,95 @@
 #include "util/debugger.h"
 #include "util/util.h"
 
-namespace {
-
-double WhiteDiffInternal(const cv::Mat& img1, const cv::Mat& img2) {
-  int diff = 0;
-  cv::Size img1_size = img1.size();
-  cv::Size img2_size = img2.size();
-  cv::Size smaller_size(std::min(img1_size.width, img2_size.width),
-                        std::min(img1_size.height, img2_size.height));
-  cv::Rect rect(cv::Point(0, 0), smaller_size);
-  cv::Mat gray1 = img1(rect);
-  cv::Mat gray2 = img2(rect);
-  for (int i = 0; i < gray1.rows; ++i) {
-    for (int j = 0; j < gray1.cols; ++j) {
-      bool is_img_1_white = (gray1.at<uchar>(i, j) > 220);
-      bool is_img_2_white = (gray2.at<uchar>(i, j) > 220);
-      if (is_img_1_white != is_img_2_white) {
-        diff++;
-      }
-    }
-  }
-  return (double)diff / (smaller_size.width * smaller_size.height);
-}
-
-double WhiteDiff(const cv::Mat& img1, const cv::Mat& img2) {
-  cv::Size size1 = img1.size();
-  cv::Size size2 = img2.size();
-
-  std::vector<double> r;
-
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      r.push_back(WhiteDiffInternal(
-          img1(cv::Rect(i, j, size1.width - i, size1.height -j)),
-          img2(cv::Rect(0, 0, size2.width, size2.height))));
-      r.push_back(WhiteDiffInternal(
-          img1(cv::Rect(0, 0, size1.width, size1.height)),
-          img2(cv::Rect(i, j, size2.width - i, size2.height - j))));
-    }
-  }
-
-  double min_r = 1e+100;
-
-  for (int i = 0; i < r.size(); ++i) {
-    if (r[i] < min_r) {
-      min_r = r[i];
-    }
-  }
-  return min_r;
-}
-
-void TrimBlankImage(const cv::Mat& edge, cv::Rect* out) {
-  int margin_l = 0;
-  int margin_r = 0;
-  int margin_t = 0;
-  int margin_b = 0;
-
-  cv::Size size = edge.size();
-
-  bool prev_black = true;
-  for (; margin_l < size.width; ++margin_l) {
-    bool all_black = true;
-    for (int i = 0; i < size.height; ++i) {
-      all_black &= (edge.at<uchar>(i, margin_l) == 0);
-    }
-    if (all_black) {
-      prev_black = true;
-      continue; // trim this line.
-    } else if (prev_black) {
-      prev_black = false;
-      continue;
-    } else {
-      margin_l--;
-      break;
-    }
-  }
-
-  for (; margin_r < size.width; ++margin_r) {
-    bool all_black = true;
-    for (int i = 0; i < size.height; ++i) {
-      all_black &= (edge.at<uchar>(i, size.width - margin_r -1) == 0);
-    }
-    if (all_black) {
-      prev_black = true;
-      continue; // trim this line.
-    } else if (prev_black) {
-      prev_black = false;
-      continue;
-    } else {
-      margin_r--;
-      break;
-    }
-  }
-
-  for (; margin_t < size.height; ++margin_t) {
-    for (int i = 0; i < size.width; ++i) {
-      if (edge.at<uchar>(margin_t, i) != 0)
-        goto end_t;
-    }
-  }
-end_t:
-  for (; margin_b < size.height; ++margin_b) {
-    for (int i = 0; i < size.width; ++i) {
-      if (edge.at<uchar>(size.height - margin_b -1, i) != 0)
-        goto end_b;
-    }
-  }
-end_b:
-  out->x = margin_l;
-  out->y = margin_t;
-  out->width = size.width - (margin_l + margin_r);
-  out->height = size.height - (margin_b + margin_t);
-}
-}  // namespace
-
 TitlePageReader::TitlePageReader()
-    : rule_rect_(730, 380, 460, 85),
-      map_rect_(1270, 870, 570, 97),
-      area_img_(cv::imread("res/area.png", 0)),
-      yagura_img_(cv::imread("res/yagura.png", 0)),
-      map_(URCHIN_UNDERPASS),
-      rule_(NAWABARI) {
-#define LOAD_IMAGE(key, fname) \
-  maps_[key] = cv::imread("res/map/" fname ".png", 0)
-  LOAD_IMAGE(URCHIN_UNDERPASS, "urchin_underpass");
-  LOAD_IMAGE(WALLEYE_WAREHOUSE, "walleye_warehouse");
-  LOAD_IMAGE(SALTSPRAY_RIG, "saltspray_rig");
-  LOAD_IMAGE(AROWANA_MALL, "arowana_mall");
-  LOAD_IMAGE(BLACKBELLY_SKATEPARK, "blackbelly_skatepark");
-  LOAD_IMAGE(PORT_MACKEREL, "port_mackerel");
-  LOAD_IMAGE(KELP_DOME, "kelp_dome");
-  LOAD_IMAGE(BLUEFIN_DEPOT, "bluefin_depot");
-  LOAD_IMAGE(MORAY_TOWERS, "moray_towers");
-  LOAD_IMAGE(CAMP_TRIGGERFISH, "camp_triggerfish");
-  LOAD_IMAGE(HIRAME, "hirame");
-#undef LOAD_IMAGE
+    : map_(URCHIN_UNDERPASS),
+      rule_(NAWABARI),
+      is_initialized_(false) {
+}
+
+void TitlePageReader::initialize(const cv::Size& size) {
+  std::string res_dir;
+  if (size.width == 1920 && size.height == 1080) {
+    initialize1080();
+  } else if (size.width == 1280 && size.height == 720) {
+    initialize720();
+  } else {
+    LOG(ERROR) << "Unsupported image size: "
+        << size.width << "x" << size.height;
+    abort();
+  }
+  is_initialized_ = true;
+}
+
+void TitlePageReader::initialize720() {
+#define LOAD_MAP_IMAGE(key, rect, fname) \
+  maps_[key] = cv::imread("res720//map/" fname ".png", 0); \
+  map_rects_[key] = rect
+  LOAD_MAP_IMAGE(URCHIN_UNDERPASS, cv::Rect(881, 579, 342, 61),
+                 "urchin_underpass");
+  LOAD_MAP_IMAGE(WALLEYE_WAREHOUSE, cv::Rect(956, 581, 268, 59),
+                 "walleye_warehouse");
+  LOAD_MAP_IMAGE(SALTSPRAY_RIG, cv::Rect(970, 593, 252, 47),
+                 "saltspray_rig");
+  LOAD_MAP_IMAGE(AROWANA_MALL, cv::Rect(940, 595, 284, 45), "arowana_mall");
+  LOAD_MAP_IMAGE(BLACKBELLY_SKATEPARK, cv::Rect(960, 588, 264, 52),
+                 "blackbelly_skatepark");
+  LOAD_MAP_IMAGE(PORT_MACKEREL, cv::Rect(990,595, 234, 45), "port_mackerel");
+  LOAD_MAP_IMAGE(KELP_DOME, cv::Rect(1003, 581, 220, 59), "kelp_dome");
+  LOAD_MAP_IMAGE(BLUEFIN_DEPOT, cv::Rect(969,587, 255, 53), "bluefin_depot");
+  LOAD_MAP_IMAGE(MORAY_TOWERS, cv::Rect(856, 581, 367, 59), "moray_towers");
+  LOAD_MAP_IMAGE(CAMP_TRIGGERFISH, cv::Rect(863, 580, 360, 60),
+                 "camp_triggerfish");
+  LOAD_MAP_IMAGE(HIRAME, cv::Rect(912, 583, 311, 57), "hirame");
+  LOAD_MAP_IMAGE(MASABA, cv::Rect(886, 588, 336, 54), "masaba");
+#undef LOAD_MAP_IMAGE
+
+#define LOAD_RULE_IMAGE(key, rect, fname) \
+  rules_[key] = cv::imread("res720/rule/" fname ".png", 0); \
+  rule_rects_[key] = rect
+  LOAD_RULE_IMAGE(NAWABARI, cv::Rect(487, 254, 303, 52), "nawabari");
+  LOAD_RULE_IMAGE(AREA, cv::Rect(534, 251, 206, 55), "area");
+  LOAD_RULE_IMAGE(YAGURA, cv::Rect(535, 251, 207, 55), "yagura");
+  LOAD_RULE_IMAGE(HOKO, cv::Rect(488, 251, 300, 55), "hoko");
+#undef LOAD_RULE_IMAGE
+}
+
+void TitlePageReader::initialize1080() {
+  LOG(ERROR) << "Not implemented yet";
+  abort();
 }
 
 TitlePageReader::~TitlePageReader() {
 }
 
-void TitlePageReader::LoadImageSequence(const std::vector<cv::Mat>& images) {
-  for (int i = 0; i < images.size(); ++i) {
-    cv::Mat tmp;
-    cv::Mat tmp2;
-    cv::cvtColor(images[i], tmp, CV_RGB2GRAY);
-    cv::threshold(tmp, tmp2, 0xE0, 0xFF, CV_THRESH_BINARY);
-    ShowAndWaitKey(tmp2);
-    if (i == 0)
-      image_ = tmp2;
-    else
-      image_ = image_.mul(tmp2);
-  }
-  cv::Mat map_image = image_(map_rect_);
-  cv::Rect trimmed_map_rect;
-  TrimBlankImage(map_image, &trimmed_map_rect);
-  map_image = map_image(trimmed_map_rect);
-  map_ = DetectMap(map_image, trimmed_map_rect);
+void TitlePageReader::LoadImage(const cv::Mat& image) {
+  if (!is_initialized_)
+    initialize(image.size());
 
-  cv::Mat rule_image = image_(rule_rect_);
-  cv::Rect trimmed_rule_rect;
-  ShowAndWaitKey(rule_image);
-  TrimBlankImage(rule_image, &trimmed_rule_rect);
-  rule_image = rule_image(trimmed_rule_rect);
-  rule_ = DetectRule(rule_image, trimmed_rule_rect);
+  cv::Mat img;
+  ExtractWhite(image, &img);
+  
+  map_ = UNKNOWN_MAP;
+  double best_map_score = 1.00;
+  for (int i = 0; i < NUM_OF_MAPS; ++i) {
+    cv::Mat clipped = img(map_rects_[i]);
+    double candidate = ImageDiff(clipped, maps_[i]);
+    if (candidate < 0.1 && candidate < best_map_score) {
+      best_map_score = candidate;
+      map_ = (Map)i;
+    }
+  }
+
+  rule_ = UNKNOWN_RULE;
+  double best_rule_score = 1.00;
+  for (int i = 0; i < NUM_OF_RULES; ++i) {
+    cv::Mat clipped = img(rule_rects_[i]);
+    double candidate = ImageDiff(clipped, rules_[i]);
+    if (candidate < 0.1 && candidate < best_rule_score) {
+      best_rule_score = candidate;
+      rule_ = (Rule)i;
+    }
+  }
 }
 
 TitlePageReader::Rule TitlePageReader::ReadRule() const {
@@ -182,50 +107,6 @@ TitlePageReader::Rule TitlePageReader::ReadRule() const {
 
 TitlePageReader::Map TitlePageReader::ReadMap() const {
   return map_;
-}
-
-TitlePageReader::Map TitlePageReader::DetectMap(
-    const cv::Mat& image, const cv::Rect& rect) {
-  double similarity[NUM_OF_MAPS];
-
-  for (int i = 0; i < NUM_OF_MAPS; ++i) {
-    cv::Size size = maps_[i].size();
-    if (abs(size.width - rect.width) > 20) {
-      similarity[i] = 1e+100;
-      continue;
-    }
-
-    similarity[i] = WhiteDiff(maps_[i], image);
-  }
-
-  int min_index = -1;
-  double min_value = 1e+50;
-  for (int i = 0; i < NUM_OF_MAPS; ++i) {
-    if (similarity[i] < min_value) {
-      min_index = i;
-      min_value = similarity[i];
-    }
-  }
-
-  if (min_index == -1) {
-    ShowAndWaitKey(image);
-    LOG(FATAL) << "Unable to detect the map name";
-    abort();
-  }
-
-  return (Map)min_index;
-}
-
-TitlePageReader::Rule TitlePageReader::DetectRule(
-    const cv::Mat& image, const cv::Rect& rect) {
-  if (rect.width > 400) {
-    return NAWABARI;
-  }
-
-  double yagura = WhiteDiff(yagura_img_, image);
-  double area = WhiteDiff(area_img_, image);
-
-  return (yagura < area) ? YAGURA : AREA;
 }
 
 // static
@@ -240,6 +121,8 @@ const char* TitlePageReader::GetRuleString(TitlePageReader::Rule rule) {
       return "\xE3\x82\xAC\xE3\x83\x81\xE3\x82\xA8\xE3\x83\xAA\xE3\x82\xA2";
     case YAGURA:
       return "\xE3\x82\xAC\xE3\x83\x81\xE3\x83\xA4\xE3\x82\xB0\xE3\x83\xA9";
+    case HOKO:
+      return "\xE3\x82\xAC\xE3\x83\x81\xE3\x83\x9B\xE3\x82\xB3";
     default:
       abort();
   }
@@ -280,6 +163,9 @@ const char* TitlePageReader::GetMapString(TitlePageReader::Map map) {
     case HIRAME:
       return "\xE3\x83\x92\xE3\x83\xA9\xE3\x83\xA1\xE3\x81\x8C\xE4\xB8\x98"
           "\xE5\x9B\xA3\xE5\x9C\xB0";
+    case MASABA:
+      return "\xE3\x83\x9E\xE3\x82\xB5\xE3\x83\x90\xE6\xB5\xB7\xE5\xB3\xA1"
+          "\xE5\xA4\xA7\xE6\xA9\x8B";
     default:
       abort();
   }

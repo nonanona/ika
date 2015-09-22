@@ -6,7 +6,7 @@
 #include "util/util.h"
 
 PaintPointClassifier::PaintPointClassifier() {
-  const char* fname = "res/paintpoint_svm.xml";
+  const char* fname = "res720/paintpoint_svm.xml";
   if (!FileExists(fname))
     LOG(FATAL) << fname << " missing.";
 
@@ -31,12 +31,13 @@ int PaintPointClassifier::Predict(const cv::Mat& image) const {
 
 void PaintPointClassifier::Prepare(const cv::Mat& image, cv::Mat* out) {
   cv::Mat tmp;
-  cv::resize(image, tmp, cv::Size(26, 30));
+  cv::resize(image, tmp, cv::Size(18, 20));
   
   cv::Mat tmp2;
   cv::cvtColor(tmp, tmp2, CV_RGB2GRAY);
 
-  *out = cv::Mat(1, 26*30, CV_32FC1);
+  cv::Size size = tmp.size();
+  *out = cv::Mat(1, size.width * size.height, CV_32FC1);
   int ii = 0;
   for (int i = 0; i < tmp2.rows; ++i) {
     for (int j = 0; j < tmp2.cols; ++j) {

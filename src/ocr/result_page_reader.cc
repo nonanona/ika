@@ -3,22 +3,17 @@
 #include "util/util.h"
 
 ResultPageReader::ResultPageReader()
-    : is_nawabari_(false),
-      image_clipper_(NULL) {
+    : image_clipper_(NULL) {
 }
 
 ResultPageReader::~ResultPageReader() {
   delete image_clipper_;
 }
 
-void ResultPageReader::SetIsNawabari(bool is_nawabari) {
-  is_nawabari_ = is_nawabari;
-}
-
 void ResultPageReader::LoadImage(const cv::Mat& image) {
   if (image_clipper_)
     delete image_clipper_;
-  image_clipper_ = new ImageClipper(image, is_nawabari_);
+  image_clipper_ = new ImageClipper(image);
 }
 
 int ResultPageReader::ReadKillCount(int index) const {
@@ -51,10 +46,6 @@ int ResultPageReader::ReadPaintPoint(int index) const {
 
 ImageClipper::PlayerStatus ResultPageReader::GetPlayerStatus(int i) const {
   return image_clipper_->GetPlayerStatus(i);
-}
-
-void ResultPageReader::ShowDebugImage(bool with_rect) const {
-  image_clipper_->ShowDebugImage(with_rect);
 }
 
 const cv::Mat& ResultPageReader::GetNameImage(int index) const {

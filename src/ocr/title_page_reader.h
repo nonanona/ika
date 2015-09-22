@@ -9,9 +9,12 @@ class TitlePageReader {
 
   enum Rule {
     UNKNOWN_RULE = 0,
-    NAWABARI,
-    AREA,
-    YAGURA,
+    NAWABARI,  // 487,254 - 303x52
+    AREA,  // 534,251 - 206x55
+    YAGURA,  // 535,251 - 207x55
+    HOKO,  // 488,251 - 300x55
+
+    NUM_OF_RULES,
   };
 
   enum Map {
@@ -27,11 +30,13 @@ class TitlePageReader {
     MORAY_TOWERS,   // TACHIUO PARKING
     CAMP_TRIGGERFISH,  // MONGARA CAMP
     HIRAME,
+    MASABA,
 
     NUM_OF_MAPS,
   };
 
-  void LoadImageSequence(const std::vector<cv::Mat>& images);
+  void initialize(const cv::Size& size);
+  void LoadImage(const cv::Mat& image);
 
   Rule ReadRule() const;
   Map ReadMap() const;
@@ -42,16 +47,16 @@ class TitlePageReader {
   void ShowDebugImage(bool with_rect) const;
 
  private:
-  Map DetectMap(const cv::Mat& image, const cv::Rect& rect);
-  Rule DetectRule(const cv::Mat& image, const cv::Rect& rect);
-
-  cv::Mat image_;
-  const cv::Rect rule_rect_;
-  const cv::Rect map_rect_;
-  const cv::Mat area_img_;
-  const cv::Mat yagura_img_;
+  void initialize720();
+  void initialize1080();
 
   cv::Mat maps_[NUM_OF_MAPS];
+  cv::Rect map_rects_[NUM_OF_MAPS];
+
+  cv::Mat rules_[NUM_OF_RULES];
+  cv::Rect rule_rects_[NUM_OF_RULES];
+
   Map map_;
   Rule rule_;
+  bool is_initialized_;
 };

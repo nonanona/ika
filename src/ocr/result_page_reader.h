@@ -17,14 +17,10 @@ class ResultPageReader {
   const cv::Mat& GetNameImage(int index) const;
   ImageClipper::PlayerStatus GetPlayerStatus(int i) const;
 
-  void ShowDebugImage(bool with_rect) const;
-
-  void SetIsNawabari(bool is_nawabari);
-  bool is_nawabari() const { return is_nawabari_; }
+  bool IsNawabari() { return image_clipper_->IsNawabari(); }
 
  private:
   cv::Mat image_;
-  bool is_nawabari_;
   ImageClipper* image_clipper_;
   KillDeathClassifier killdeath_classifier_;
   PaintPointClassifier paintpoint_classifier_;

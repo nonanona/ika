@@ -32,4 +32,5 @@ class ComponentExtractCommand : public Command {
   bool is_nawabari_;
   bool is_debug_;
   bool is_overwrite_;
+  bool predict_;
 };

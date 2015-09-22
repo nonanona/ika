@@ -22,8 +22,6 @@ ReadResultCommand::~ReadResultCommand() {
 
 bool ReadResultCommand::ProcessArgs(int argc, char** argv) {
   image_path_ = GetCmdOption(argv + 1, argv + argc, "-i");
-  is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
-  is_nawabari_ = HasCmdOption(argv + 1, argv + argc, "--nawabari");
   return !image_path_.empty();
 }
 
@@ -34,7 +32,6 @@ void ReadResultCommand::PrintUsage(const char* myself) {
 
 void ReadResultCommand::Run() {
   ResultPageReader rpr;
-  rpr.SetIsNawabari(is_nawabari_);
   cv::Mat result_image = cv::imread(image_path_.c_str());
   rpr.LoadImage(result_image);
 
@@ -45,10 +42,7 @@ void ReadResultCommand::Run() {
   for (int i = 0; i < 8; ++i) {
     handler->PushBattleResult(
         0, i, i, rpr.ReadKillCount(i), rpr.ReadDeathCount(i),
-        is_nawabari_ ? rpr.ReadPaintPoint(i): -1,
+        rpr.IsNawabari() ? rpr.ReadPaintPoint(i): -1,
         rpr.GetPlayerStatus(i));
   }
-
-  if (is_debug_)
-    rpr.ShowDebugImage(true);
 }

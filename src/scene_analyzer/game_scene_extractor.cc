@@ -179,6 +179,11 @@ bool GameSceneExtractor::FindResultEnd(
   vc_->set(CV_CAP_PROP_POS_MSEC, battle_end_msec + 10 * 1000);
 
   while (true) {
+    int64_t cur_msec = vc_->get(CV_CAP_PROP_POS_MSEC);
+    if (cur_msec - battle_end_msec > 60000) {
+      // Give up if can not find the result end until 1 min.
+      return false;
+    }
     vc_->read(frame_img);
     if (frame_img.empty()) {
       LOG(ERROR) << "Failed to obtain frame image at "
@@ -342,8 +347,9 @@ bool GameSceneExtractor::FindNearestGameRegion(
 
   if (!FindResultEnd(out->battle_frame.start + out->battle_frame.duration,
                      &out->result_msec, &out->result_frame)) {
-    LOG(WARNING) << "Failed to find end of reult position.";
-    return false;
+    return FindNearestGameRegion(
+        out->battle_frame.start + out->battle_frame.duration + 1,
+        out);
   }
 
   int64_t blackout_end_frame = FindEarliestBlackoutEndFrame(
