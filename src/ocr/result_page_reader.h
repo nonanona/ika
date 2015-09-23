@@ -9,7 +9,7 @@ class ResultPageReader {
   ResultPageReader();
   ~ResultPageReader();
 
-  void LoadImage(const cv::Mat& image);
+  void LoadImage(const cv::Mat& image, bool is_camera);
 
   int ReadKillCount(int index) const;
   int ReadDeathCount(int index) const;
@@ -18,6 +18,9 @@ class ResultPageReader {
   ImageClipper::PlayerStatus GetPlayerStatus(int i) const;
 
   bool IsNawabari() { return image_clipper_->IsNawabari(); }
+  void ShowDebugImage(const cv::Mat& image) const {
+    image_clipper_->ShowDebugImage(image);
+  }
 
  private:
   cv::Mat image_;

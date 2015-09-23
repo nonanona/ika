@@ -6,7 +6,7 @@
 
 class BattleSceneAnalyzer : public SceneAnalyzer::Interface {
  public:
-  BattleSceneAnalyzer(const cv::Size& size);
+  BattleSceneAnalyzer(const cv::Size& size, bool is_camera);
   virtual ~BattleSceneAnalyzer();
   virtual void drawDebugInfo(cv::Mat* frame);
   virtual bool IsScene(const cv::Mat& frame);

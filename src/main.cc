@@ -6,6 +6,7 @@
 
 #include "command.h"
 #include "component_extract_command.h"
+#include "camera_capture_command.h"
 #include "read_result_command.h"
 #include "scene_extractor_command.h"
 #include "learning_command.h"
@@ -19,6 +20,7 @@ int main(int argc, char** argv) {
     new ReadResultCommand(),
     new ComponentExtractCommand(),
     new LearningCommand(),
+    new CameraCaptureCommand(),
   };
 
   const std::string command(argc == 1 ? "" : argv[1]);

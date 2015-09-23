@@ -102,9 +102,7 @@ int getStatus(const cv::Rect& first_rank_rect, int frame_interval,
     double player_diff = ImageDiff(rank_img, bw_image(player_rect));
     if (normal_diff > player_diff) {
       if (you_idx != -1) {
-        LOG(ERROR) << "Found two or more player position.";
-        ShowAndWaitKey(bw_image);
-        abort();
+        return -1;
       }
       out[i] = ImageClipper::YOU;
       you_idx = i;
@@ -123,24 +121,24 @@ int getStatus(const cv::Rect& first_rank_rect, int frame_interval,
 
 }  // namespace
 
-ImageClipper::ImageClipper(const std::string& fname) {
+ImageClipper::ImageClipper(const std::string& fname, bool is_camera) {
   cv::Mat image = cv::imread(fname);
-  calcRect(image);
+  calcRect(image, is_camera);
   clipImage(image);
 }
 
-ImageClipper::ImageClipper(const cv::Mat& image) {
-  calcRect(image);
+ImageClipper::ImageClipper(const cv::Mat& image, bool is_camera) {
+  calcRect(image, is_camera);
   clipImage(image);
 }
 
 ImageClipper::~ImageClipper() {
 }
 
-void ImageClipper::calcRect(const cv::Mat& image) {
+void ImageClipper::calcRect(const cv::Mat& image, bool is_camera) {
   const cv::Size size = image.size();
   if (size.width == 1280 && size.height == 720) {
-    calcRect720(image);
+    calcRect720(image, is_camera);
   } else if (size.width == 1920 && size.height == 1080) {
     calcRect1080(image);
   } else {
@@ -150,7 +148,7 @@ void ImageClipper::calcRect(const cv::Mat& image) {
   }
 }
 
-void ImageClipper::calcRect720(const cv::Mat& image) {
+void ImageClipper::calcRect720(const cv::Mat& image, bool is_camera) {
   const int kPlayerDiff = 41;
   const int kFrameInterval = 65;
   const int kLoseIndent = 70;
@@ -168,6 +166,10 @@ void ImageClipper::calcRect720(const cv::Mat& image) {
   int player_idx =  getStatus(kFirstRankRect, kFrameInterval, kPlayerDiff,
                               kLoseIndent, cv::imread("res720/rank.png", 0),
                               bw_image, status_);
+  if (player_idx == -1) {
+    LOG(ERROR) << "Rank string position error. still loading a result scene?";
+    abort();
+  }
   for (int i = 0; i < 8; ++i) {
     rects_[i].frame = cv::Rect(632, 94 + kFrameInterval * i, 611, 52);
     rects_[i].name = cv::Rect(808, 99 + kFrameInterval * i, 180, 40);
@@ -203,6 +205,37 @@ void ImageClipper::calcRect720(const cv::Mat& image) {
   rects_[player_idx].frame.width += kPlayerDiff;
   rects_[player_idx].name.x -= kPlayerDiff;
   rects_[player_idx].weapon.x -= kPlayerDiff;
+
+  if (is_camera) {
+    // little calibration for camera
+    for (int i = 0; i < 8; ++i) {
+      rects_[i].kill[0].x += 2;
+      rects_[i].kill[1].x += 2;
+      rects_[i].death[0].x += 2;
+      rects_[i].death[1].x += 2;
+
+      rects_[i].kill[0].y += 1;
+      rects_[i].kill[1].y += 1;
+      rects_[i].death[0].y += 1;
+      rects_[i].death[1].y += 1;
+
+      for (int j = 0; j < 4; ++j) {
+        rects_[i].point[j].x += 2;
+        rects_[i].point[j].y += 1;
+      }
+
+      if (i < 4)
+        continue;
+      rects_[i].kill[0].y += 1;
+      rects_[i].kill[1].y += 1;
+      rects_[i].death[0].y += 1;
+      rects_[i].death[1].y += 1;
+
+      for (int j = 0; j < 4; ++j) {
+        rects_[i].point[j].y += 1;
+      }
+    }
+  }
 
   for (int i = 0; i < 8; ++i) {
     TrimBlankImage(image, &rects_[i].name);

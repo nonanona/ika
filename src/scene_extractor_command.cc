@@ -59,13 +59,13 @@ void SceneExtractorCommand::Run() {
     int64_t title_frame =
         region.title_frame.start + region.title_frame.duration / 2;
     gse.GetImageAt(title_frame, &title_image);
-    tpr.LoadImage(title_image);
+    tpr.LoadImage(title_image, false /* not a camera */);
 
     cv::Mat result_image;
     const int64_t result_pos =
         region.result_frame.start + region.result_frame.duration / 2;
     gse.GetImageAt(result_pos, &result_image);
-    rpr.LoadImage(result_image);
+    rpr.LoadImage(result_image, false /* not a camera */);
 
     handler->PushBattleId(battle_id, tpr.ReadRule(), tpr.ReadMap());
     handler->PushBattleSceneInfo(battle_id, region);

@@ -62,6 +62,15 @@ bool IsBlackImage(const cv::Mat& in) {
   }
   return true;
 }
+bool IsWhiteImage(const cv::Mat& in) {
+  for (int i = 0; i < in.rows;++i) {
+    for (int j = 0; j < in.cols; ++j) {
+      if (in.at<uchar>(i, j) != 0xFF)
+        return false;
+    }
+  }
+  return true;
+}
 
 double ImageDiff(const cv::Mat& l, const cv::Mat& r) {
   int diff_cnt = 0;

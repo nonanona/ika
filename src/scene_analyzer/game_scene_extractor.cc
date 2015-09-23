@@ -19,7 +19,7 @@ GameSceneExtractor::GameSceneExtractor(const std::string& video_path)
   video_size_ = cv::Size(
       static_cast<int64_t>(vc_->get(CV_CAP_PROP_FRAME_WIDTH)),
       static_cast<int64_t>(vc_->get(CV_CAP_PROP_FRAME_HEIGHT)));
-  analyzer_ = new SceneAnalyzer(video_size_);
+  analyzer_ = new SceneAnalyzer(video_size_, false /* not a camera */);
 }
 
 GameSceneExtractor::~GameSceneExtractor() {

@@ -6,13 +6,13 @@
 
 #include <string>
 
-class ReadResultCommand : public Command {
+class CameraCaptureCommand : public Command {
  public:
-  ReadResultCommand();
-  virtual ~ReadResultCommand();
+  CameraCaptureCommand();
+  virtual ~CameraCaptureCommand();
 
   virtual const char* GetCommandName() const {
-    return "read_result";
+    return "camera_capture";
   }
   virtual bool ProcessArgs(int argc, char** argv);
   virtual void PrintUsage(const char* myself);
@@ -20,8 +20,4 @@ class ReadResultCommand : public Command {
 
  private:
   static std::string MsecToString(int64_t msec);
-
-  std::string image_path_;
-  bool is_debug_;
-  bool is_camera_;
 };

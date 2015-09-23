@@ -4,7 +4,7 @@
 
 class SceneAnalyzer {
  public:
-  SceneAnalyzer(const cv::Size& size);
+  SceneAnalyzer(const cv::Size& size, bool is_camera);
   virtual ~SceneAnalyzer();
 
   class Interface {

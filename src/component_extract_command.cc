@@ -24,6 +24,7 @@ bool ComponentExtractCommand::ProcessArgs(int argc, char** argv) {
   is_debug_ = HasCmdOption(argv + 1, argv + argc, "--debug");
   is_overwrite_ = HasCmdOption(argv + 1, argv + argc, "--overwrite");
   predict_ = HasCmdOption(argv + 1, argv + argc, "--predict");
+  is_camera_ = HasCmdOption(argv + 1, argv + argc, "--camera");
   return !image_path_.empty() && !output_dir_.empty();
 }
 
@@ -110,7 +111,7 @@ void ComponentExtractCommand::SaveToFile(const std::string& path) {
     MakeSureDirExists(subdir);
   }
 
-  ImageClipper ic(path);
+  ImageClipper ic(path, is_camera_);
 
   char predict[2] = {};
   cv::Mat tmp;

@@ -8,8 +8,8 @@ class Classifier;
 
 class ImageClipper {
  public:
-  ImageClipper(const std::string& fname);
-  ImageClipper(const cv::Mat& image);
+  ImageClipper(const std::string& fname, bool is_camera);
+  ImageClipper(const cv::Mat& image, bool is_camera);
   virtual ~ImageClipper();
 
   enum PlayerStatus {
@@ -56,8 +56,8 @@ class ImageClipper {
   }
 
  private:
-  void calcRect(const cv::Mat& image);
-  void calcRect720(const cv::Mat& image);
+  void calcRect(const cv::Mat& image, bool is_camera);
+  void calcRect720(const cv::Mat& image, bool is_camera);
   void calcRect1080(const cv::Mat& image);
   void clipImage(const cv::Mat& image);
 

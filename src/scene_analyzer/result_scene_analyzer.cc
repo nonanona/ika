@@ -7,8 +7,9 @@
 #include "util/debugger.h"
 #include "scene_analyzer/result_scene_analyzer.h"
 #include "glog/logging.h"
+#include "ocr/image_clipper.h"
 
-ResultSceneAnalyzer::ResultSceneAnalyzer(const cv::Size& size) {
+ResultSceneAnalyzer::ResultSceneAnalyzer(const cv::Size& size, bool is_camera) {
   if (size.width == 1920 && size.height == 1080) {
     win_rec_ = cv::Rect(990, 70, 140, 50);
     win_ = cv::imread("res/win.png", CV_LOAD_IMAGE_GRAYSCALE);

@@ -35,8 +35,8 @@ class TitlePageReader {
     NUM_OF_MAPS,
   };
 
-  void initialize(const cv::Size& size);
-  void LoadImage(const cv::Mat& image);
+  void initialize(const cv::Size& size, bool is_camera);
+  void LoadImage(const cv::Mat& image, bool is_camera);
 
   Rule ReadRule() const;
   Map ReadMap() const;
@@ -59,4 +59,5 @@ class TitlePageReader {
   Map map_;
   Rule rule_;
   bool is_initialized_;
+  bool is_camera_;
 };

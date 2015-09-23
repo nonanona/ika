@@ -5,13 +5,15 @@
 #include "glog/logging.h"
 #include "scene_analyzer/battle_scene_analyzer.h"
 
-BattleSceneAnalyzer::BattleSceneAnalyzer(const cv::Size& size) {
+BattleSceneAnalyzer::BattleSceneAnalyzer(const cv::Size& size, bool is_camera) {
   if (size.width == 1920 && size.height == 1080) {
     clock_rec_ = cv::Rect(89, 49, 44, 51);
     clock_ = cv::imread("res/clock.png", CV_LOAD_IMAGE_GRAYSCALE);
   } else if (size.width == 1280 && size.height == 720) {
     clock_rec_ = cv::Rect(53, 30, 40, 40);
-    clock_ = cv::imread("res720/clock.png", CV_LOAD_IMAGE_GRAYSCALE);
+    clock_ = cv::imread(
+        is_camera ? "res720camera/clock.png" : "res720/clock.png",
+        CV_LOAD_IMAGE_GRAYSCALE);
   } else {
     LOG(ERROR) << "Unsupported image size: "
         << size.width << "x" << size.height;

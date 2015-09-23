@@ -12,9 +12,9 @@
 #include "scene_analyzer/blackout_scene_analyzer.h"
 #include "scene_analyzer/whiteout_scene_analyzer.h"
 
-SceneAnalyzer::SceneAnalyzer(const cv::Size& size)
-    : battle_analyzer_(new BattleSceneAnalyzer(size)),
-      result_analyzer_(new ResultSceneAnalyzer(size)),
+SceneAnalyzer::SceneAnalyzer(const cv::Size& size, bool is_camera)
+    : battle_analyzer_(new BattleSceneAnalyzer(size, is_camera)),
+      result_analyzer_(new ResultSceneAnalyzer(size, is_camera)),
       blackout_analyzer_(new BlackoutSceneAnalyzer(size)),
       whiteout_analyzer_(new WhiteoutSceneAnalyzer(size)) {
 }

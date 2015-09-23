@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "scene_analyzer/blackout_scene_analyzer.h"
+#include "util/util.h"
 
 #define CLIP_WIDTH 200
 #define CLIP_HEIGHT 200
@@ -22,17 +23,9 @@ void BlackoutSceneAnalyzer::drawDebugInfo(cv::Mat* frame) {
 bool BlackoutSceneAnalyzer::IsScene(const cv::Mat& frame) {
   cv::Mat win(frame, rec_);
 
-  cv::Size win_size = win.size();
-  int win_sum = 0;
-  for (int i = 0; i < win_size.height; ++i) {
-    const uchar* line1 = win.ptr<uchar>(i);
-    for (int j = 0; j < win_size.width; ++j) {
-      win_sum += line1[j];
-    }
-  }
-
-  double avg = static_cast<double>(win_sum)
-      / static_cast<double>(win_size.width * win_size.height);
-
-  return avg < 3.0;
+  cv::Mat tmp;
+  cv::Mat tmp2;
+  cv::cvtColor(win, tmp, CV_RGB2GRAY);
+  cv::threshold(tmp, tmp2, 0x10, 0xFF, CV_THRESH_BINARY);
+  return IsBlackImage(tmp2);
 }

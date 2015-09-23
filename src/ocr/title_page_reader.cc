@@ -16,7 +16,7 @@ TitlePageReader::TitlePageReader()
       is_initialized_(false) {
 }
 
-void TitlePageReader::initialize(const cv::Size& size) {
+void TitlePageReader::initialize(const cv::Size& size, bool is_camera) {
   std::string res_dir;
   if (size.width == 1920 && size.height == 1080) {
     initialize1080();
@@ -28,12 +28,17 @@ void TitlePageReader::initialize(const cv::Size& size) {
     abort();
   }
   is_initialized_ = true;
+  is_camera_ = is_camera;
 }
 
 void TitlePageReader::initialize720() {
 #define LOAD_MAP_IMAGE(key, rect, fname) \
-  maps_[key] = cv::imread("res720//map/" fname ".png", 0); \
-  map_rects_[key] = rect
+  maps_[key] = cv::imread("res720/map/" fname ".png", 0); \
+  map_rects_[key] = rect; \
+  if (maps_[key].empty()) { \
+    LOG(ERROR) << fname << " not found"; \
+    abort(); \
+  }
   LOAD_MAP_IMAGE(URCHIN_UNDERPASS, cv::Rect(881, 579, 342, 61),
                  "urchin_underpass");
   LOAD_MAP_IMAGE(WALLEYE_WAREHOUSE, cv::Rect(956, 581, 268, 59),
@@ -71,17 +76,23 @@ void TitlePageReader::initialize1080() {
 TitlePageReader::~TitlePageReader() {
 }
 
-void TitlePageReader::LoadImage(const cv::Mat& image) {
+void TitlePageReader::LoadImage(const cv::Mat& image, bool is_camera) {
   if (!is_initialized_)
-    initialize(image.size());
+    initialize(image.size(), is_camera);
 
   cv::Mat img;
   ExtractWhite(image, &img);
   
   map_ = UNKNOWN_MAP;
   double best_map_score = 1.00;
-  for (int i = 0; i < NUM_OF_MAPS; ++i) {
-    cv::Mat clipped = img(map_rects_[i]);
+  for (int i = 1; i < NUM_OF_MAPS; ++i) {
+    cv::Rect r = map_rects_[i];
+
+    if (is_camera_) {
+      r.x += 2; r.y += 2;
+    }
+
+    cv::Mat clipped = img(r);
     double candidate = ImageDiff(clipped, maps_[i]);
     if (candidate < 0.1 && candidate < best_map_score) {
       best_map_score = candidate;
@@ -91,7 +102,7 @@ void TitlePageReader::LoadImage(const cv::Mat& image) {
 
   rule_ = UNKNOWN_RULE;
   double best_rule_score = 1.00;
-  for (int i = 0; i < NUM_OF_RULES; ++i) {
+  for (int i = 1; i < NUM_OF_RULES; ++i) {
     cv::Mat clipped = img(rule_rects_[i]);
     double candidate = ImageDiff(clipped, rules_[i]);
     if (candidate < 0.1 && candidate < best_rule_score) {

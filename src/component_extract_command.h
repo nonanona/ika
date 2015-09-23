@@ -33,4 +33,5 @@ class ComponentExtractCommand : public Command {
   bool is_debug_;
   bool is_overwrite_;
   bool predict_;
+  bool is_camera_;
 };

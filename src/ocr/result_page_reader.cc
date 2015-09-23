@@ -10,10 +10,10 @@ ResultPageReader::~ResultPageReader() {
   delete image_clipper_;
 }
 
-void ResultPageReader::LoadImage(const cv::Mat& image) {
+void ResultPageReader::LoadImage(const cv::Mat& image, bool is_camera) {
   if (image_clipper_)
     delete image_clipper_;
-  image_clipper_ = new ImageClipper(image);
+  image_clipper_ = new ImageClipper(image, is_camera);
 }
 
 int ResultPageReader::ReadKillCount(int index) const {
